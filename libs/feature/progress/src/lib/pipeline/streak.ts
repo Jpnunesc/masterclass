@@ -59,11 +59,50 @@ export function computeStreaks(timestamps: readonly string[]): StreakStats {
 export function toUtcDayKey(iso: string): string | null {
   const parsed = Date.parse(iso);
   if (Number.isNaN(parsed)) return null;
-  const d = new Date(parsed);
+  return msToUtcDayKey(parsed);
+}
+
+function msToUtcDayKey(ms: number): string {
+  const d = new Date(ms);
   const y = d.getUTCFullYear();
   const m = `${d.getUTCMonth() + 1}`.padStart(2, '0');
   const day = `${d.getUTCDate()}`.padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+export interface ActiveDay {
+  readonly dayKey: string;
+  readonly active: boolean;
+  readonly today: boolean;
+}
+
+/**
+ * Build the 14-day active/inactive strip ending on the day represented by
+ * `nowMs`. The result is ordered oldest → today, which matches the spec's
+ * left-to-right render order.
+ */
+export function activeDays14(
+  timestamps: readonly string[],
+  nowMs: number
+): readonly ActiveDay[] {
+  const DAY = 24 * 60 * 60 * 1000;
+  const todayUtcStart = Math.floor(nowMs / DAY) * DAY;
+  const keys = new Set<string>();
+  for (const ts of timestamps) {
+    const key = toUtcDayKey(ts);
+    if (key) keys.add(key);
+  }
+  const out: ActiveDay[] = [];
+  for (let i = 13; i >= 0; i--) {
+    const ms = todayUtcStart - i * DAY;
+    const dayKey = msToUtcDayKey(ms);
+    out.push({
+      dayKey,
+      active: keys.has(dayKey),
+      today: i === 0
+    });
+  }
+  return out;
 }
 
 function isNextDay(prevKey: string, currKey: string): boolean {

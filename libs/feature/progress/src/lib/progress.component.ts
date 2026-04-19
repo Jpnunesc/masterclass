@@ -2,120 +2,236 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  ViewEncapsulation,
   computed,
   inject,
+  isDevMode,
   signal
 } from '@angular/core';
 
-import { LIVE_ANNOUNCER } from '@shared/a11y';
 import { I18nService, type I18nKey, type SupportedLocale } from '@shared/i18n';
+import { LearnerSessionService } from '@feature/auth';
+import {
+  LessonLibraryService,
+  LessonRowComponent,
+  type LibraryLesson
+} from '@feature/materials';
 
-import { emptySnapshot, type TimelineEvent } from './domain/progress.types';
+import {
+  pickHeroIndex,
+  resolveHeroBucket,
+  utcDayIso,
+  railPosition,
+  nextBucketPct,
+  isAtCap,
+  nextBucketCode,
+  RAIL_BUCKETS,
+  type HeroBucket
+} from './pipeline/hero';
+import { activeDays14 } from './pipeline/streak';
 import { ProgressService } from './progress.service';
+import { ProgressHeroComponent } from './ui/progress-hero.component';
 import {
-  ProgressEvolutionTimelineComponent,
-  type TimelineLabels
-} from './ui/evolution-timeline.component';
-import { ProgressLevelCardComponent } from './ui/level-card.component';
+  ProgressStreakComponent,
+  type StreakDay
+} from './ui/progress-streak.component';
 import {
-  ProgressGoalListComponent,
-  type GoalListLabels
-} from './ui/goal-list.component';
+  ProgressLevelRailComponent,
+  type RailBucketLabel
+} from './ui/progress-level-rail.component';
 import {
-  ProgressSkillBarsComponent,
-  type SkillBarLabel
-} from './ui/skill-bars.component';
-import { ProgressStreakCardComponent } from './ui/streak-card.component';
-import type { MaterialKind, MaterialTopic } from '@feature/materials';
+  ProgressSkillBalanceComponent,
+  type SkillBar
+} from './ui/progress-skill-balance.component';
+
+type SkillShareKey = 'listen' | 'speak' | 'read' | 'write';
+
+const MAX_HERO_VARIANTS = 8;
+const MIN_HERO_VARIANTS = 4;
+const RECENT_SESSIONS_LIMIT = 10;
+const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
 @Component({
   selector: 'mc-progress',
   standalone: true,
   imports: [
-    ProgressEvolutionTimelineComponent,
-    ProgressGoalListComponent,
-    ProgressLevelCardComponent,
-    ProgressSkillBarsComponent,
-    ProgressStreakCardComponent
+    LessonRowComponent,
+    ProgressHeroComponent,
+    ProgressLevelRailComponent,
+    ProgressSkillBalanceComponent,
+    ProgressStreakComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
-    <section class="mc-progress mc-container mc-stack">
-      <header class="mc-progress-header">
-        <p class="mc-caption">{{ i18n.t('progress.kicker') }}</p>
-        <h1 class="mc-display-md">{{ i18n.t('progress.title') }}</h1>
-        <p class="mc-body-lg mc-lead">{{ i18n.t('progress.lead') }}</p>
-      </header>
+    <main
+      class="mc-progress"
+      id="main"
+      data-density="comfortable"
+      [attr.aria-labelledby]="heroId"
+    >
+      <p class="mc-progress__eyebrow">{{ i18n.t('progress.eyebrow') }}</p>
 
-      <div class="mc-progress-dashboard">
-        <mc-progress-level-card
-          [snapshotValue]="effectiveSnapshot()"
-          [ariaLabel]="i18n.t('progress.level.aria')"
-          [kickerLabel]="i18n.t('progress.level.kicker')"
-          [summaryLabel]="levelSummary()"
-          [overallLabel]="i18n.t('progress.level.overall')"
-          [confidenceLabel]="i18n.t('progress.level.confidence')"
-          [lessonsLabel]="i18n.t('progress.level.lessons')"
-          [progressBarLabel]="i18n.t('progress.level.bar.aria')"
+      <mc-progress-hero [id]="heroId" [text]="heroText()" />
+
+      <section
+        class="mc-progress__module mc-progress__module--streak"
+        aria-labelledby="mc-progress-streak-label"
+      >
+        <mc-progress-streak
+          labelId="mc-progress-streak-label"
+          [count]="streakDays()"
+          [label]="streakLabel()"
+          [days]="streakDots()"
+          [rangeLabel]="i18n.t('progress.streak.range')"
         />
-        <mc-progress-streak-card
-          [ariaLabel]="i18n.t('progress.streak.aria')"
-          [kickerLabel]="i18n.t('progress.streak.kicker')"
-          [streakLabel]="streakLabel()"
-          [longestLabel]="i18n.t('progress.streak.longest')"
-          [longestValue]="longestStreakLabel()"
-          [lastActiveLabel]="i18n.t('progress.streak.last_active')"
-          [lastActiveValue]="lastActiveLabel()"
-          [materialsLabel]="i18n.t('progress.streak.materials')"
-          [materialsValue]="materialsLabel()"
+      </section>
+
+      <section class="mc-progress__module">
+        <mc-progress-level-rail
+          [eyebrowLabel]="i18n.t('progress.level.eyebrow')"
+          [currentLabel]="currentLevelLabel()"
+          [caption]="levelCaption()"
+          [railAriaLabel]="railAriaLabel()"
+          [positionPct]="railPct()"
+          [nextPct]="nextPct()"
+          [atCap]="atCap()"
+          [bucketLabels]="bucketLabels()"
         />
-      </div>
+      </section>
 
-      <mc-progress-skill-bars
-        [skillsValue]="effectiveSnapshot().skills"
-        [labelsValue]="skillLabels()"
-        [ariaLabel]="i18n.t('progress.skills.aria')"
-        [headingLabel]="i18n.t('progress.skills.title')"
-        [leadLabel]="i18n.t('progress.skills.lead')"
-      />
+      <section
+        class="mc-progress__module"
+        data-density="comfortable"
+        aria-labelledby="mc-progress-sessions-head"
+      >
+        <header class="mc-progress__sessions-head">
+          <p
+            class="mc-progress__eyebrow mc-progress__eyebrow--inline"
+            id="mc-progress-sessions-head"
+          >{{ i18n.t('progress.sessions.eyebrow') }}</p>
+          @if (recentSessions().length > 0) {
+            <a
+              class="mc-progress__sessions-link"
+              href="/materials"
+            >{{ i18n.t('progress.sessions.viewAll') }}</a>
+          }
+        </header>
 
-      <mc-progress-evolution-timeline
-        [events]="resolvedTimeline()"
-        [labels]="timelineLabels()"
-        [locale]="i18n.locale()"
-      />
+        @if (recentSessions().length > 0) {
+          <ul class="mc-progress__sessions" role="list">
+            @for (lesson of recentSessions(); track lesson.id) {
+              <li>
+                <mc-lesson-row
+                  [lesson]="lesson"
+                  [labels]="rowLabels()"
+                  [skillLabel]="skillLabel(lesson)"
+                  [durationText]="durationText(lesson)"
+                  [progressAria]="rowProgressAria(lesson)"
+                />
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="mc-progress__sessions-empty">
+            <p>{{ i18n.t('progress.sessions.empty') }}</p>
+          </div>
+        }
+      </section>
 
-      <mc-progress-goal-list
-        [goals]="service.goals()"
-        [milestones]="service.milestones()"
-        [labels]="goalLabels()"
-        [refreshing]="refreshingSignal()"
-        (refresh)="refreshGoals()"
-      />
-    </section>
+      <section class="mc-progress__module">
+        <mc-progress-skill-balance
+          eyebrowId="mc-progress-skills-eyebrow"
+          [eyebrow]="i18n.t('progress.skills.eyebrow')"
+          [range]="i18n.t('progress.skills.range')"
+          [bars]="skillBars()"
+          [empty]="skillsEmpty()"
+          [emptyLabel]="i18n.t('progress.skills.empty')"
+        />
+      </section>
+    </main>
   `,
   styles: [
     `
-      :host { display: block; }
       .mc-progress {
-        padding-block: var(--mc-pad-section);
         display: grid;
-        gap: var(--mc-gap-stack);
+        max-width: var(--mc-shell-nav-max);
+        margin: 0 auto;
+        padding: var(--mc-space-8) var(--mc-space-5);
+        gap: var(--mc-space-8);
       }
-      .mc-progress-header {
-        display: grid;
-        gap: var(--mc-space-2);
-        max-width: var(--mc-reading-max);
-      }
-      .mc-progress-dashboard {
-        display: grid;
-        gap: var(--mc-gap-stack);
-        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-      }
-      @media (max-width: 48rem) {
-        .mc-progress-dashboard {
-          grid-template-columns: minmax(0, 1fr);
+      @media (min-width: 64rem) {
+        .mc-progress {
+          padding: var(--mc-space-10) var(--mc-space-10);
+          gap: var(--mc-space-12);
         }
+      }
+      .mc-progress__eyebrow {
+        margin: 0;
+        color: var(--mc-ink-muted);
+        font-size: var(--mc-fs-caption);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .mc-progress__eyebrow + mc-progress-hero {
+        margin-block-start: var(--mc-space-4);
+        display: block;
+      }
+      .mc-progress mc-progress-hero {
+        display: block;
+      }
+      .mc-progress__module {
+        display: block;
+      }
+      @media (min-width: 64rem) {
+        .mc-progress mc-progress-hero + .mc-progress__module {
+          margin-block-start: var(--mc-space-4);
+        }
+      }
+      .mc-progress__sessions-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--mc-space-3);
+        margin-block-end: var(--mc-space-3);
+      }
+      .mc-progress__eyebrow--inline {
+        margin: 0;
+      }
+      .mc-progress__sessions-link {
+        font-size: var(--mc-fs-caption);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--mc-accent);
+        text-decoration: none;
+      }
+      .mc-progress__sessions-link:hover,
+      .mc-progress__sessions-link:focus-visible {
+        text-decoration: underline;
+      }
+      @media (max-width: 47.99rem) {
+        .mc-progress__sessions-head {
+          margin-block-end: var(--mc-space-2);
+        }
+        .mc-progress__sessions-link {
+          display: none;
+        }
+      }
+      .mc-progress__sessions {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        background: var(--mc-bg-raised);
+        border: 1px solid var(--mc-line);
+        border-radius: var(--mc-radius-md);
+        overflow: hidden;
+      }
+      .mc-progress__sessions-empty {
+        padding: var(--mc-space-6);
+        background: var(--mc-bg-raised);
+        border: 1px solid var(--mc-line);
+        border-radius: var(--mc-radius-md);
+        color: var(--mc-ink-muted);
       }
     `
   ]
@@ -123,188 +239,266 @@ import type { MaterialKind, MaterialTopic } from '@feature/materials';
 export class ProgressComponent implements OnInit {
   protected readonly i18n = inject(I18nService);
   protected readonly service = inject(ProgressService);
-  private readonly announcer = inject(LIVE_ANNOUNCER);
+  private readonly library = inject(LessonLibraryService);
+  private readonly session = inject(LearnerSessionService);
 
-  protected readonly refreshingSignal = signal(false);
+  protected readonly heroId = 'mc-progress-title';
+
+  private readonly mountedAtSignal = signal<number>(Date.now());
 
   ngOnInit(): void {
     this.service.start();
+    this.mountedAtSignal.set(Date.now());
   }
 
-  protected readonly effectiveSnapshot = computed(() => {
-    const snap = this.service.snapshot();
-    return snap ?? emptySnapshot('anonymous', new Date(0).toISOString());
+  /** Bucket the current user falls into — `first match wins` per spec §2.3. */
+  protected readonly heroBucket = computed<HeroBucket>(() =>
+    resolveHeroBucket({
+      snapshot: this.service.snapshot(),
+      milestones: this.service.milestones(),
+      now: this.mountedAtSignal()
+    })
+  );
+
+  /**
+   * Deterministic variant index per user per day. Resolved once on mount so
+   * the hero does not re-roll when data loads in or the user tabs back.
+   */
+  protected readonly heroText = computed<string>(() => {
+    const bucket = this.heroBucket();
+    const userId = this.session.identity()?.userId ?? 'anonymous';
+    const dayIso = utcDayIso(this.mountedAtSignal());
+    const bucketPick = this.pickBucketText(bucket, userId, dayIso);
+    if (bucketPick !== null) return bucketPick;
+    // Underfilled bucket: fall back to default and warn once per bucket.
+    this.warnUnderfilled(bucket);
+    const fallback = this.pickBucketText('default', userId, dayIso);
+    return fallback ?? '';
   });
 
-  protected readonly skillLabels = computed<readonly SkillBarLabel[]>(() => [
-    {
-      key: 'listen',
-      label: this.i18n.t('assessment.skill.listen'),
-      barAria: this.i18n.t('progress.skills.bar.aria', {
-        skill: this.i18n.t('assessment.skill.listen')
-      })
-    },
-    {
-      key: 'speak',
-      label: this.i18n.t('assessment.skill.speak'),
-      barAria: this.i18n.t('progress.skills.bar.aria', {
-        skill: this.i18n.t('assessment.skill.speak')
-      })
-    },
-    {
-      key: 'read',
-      label: this.i18n.t('assessment.skill.read'),
-      barAria: this.i18n.t('progress.skills.bar.aria', {
-        skill: this.i18n.t('assessment.skill.read')
-      })
-    },
-    {
-      key: 'write',
-      label: this.i18n.t('assessment.skill.write'),
-      barAria: this.i18n.t('progress.skills.bar.aria', {
-        skill: this.i18n.t('assessment.skill.write')
-      })
-    }
-  ]);
-
-  protected readonly levelSummary = computed(() =>
-    this.i18n.t('progress.level.summary', {
-      level: this.effectiveSnapshot().level,
-      lessons: this.effectiveSnapshot().lessonsCompleted
-    })
+  protected readonly streakDays = computed(() =>
+    this.service.snapshot()?.streakDays ?? 0
   );
 
   protected readonly streakLabel = computed(() =>
-    this.i18n.t('progress.streak.days', {
-      days: this.effectiveSnapshot().streakDays
-    })
+    this.i18n.t('progress.streak.label', { count: this.streakDays() })
   );
 
-  protected readonly longestStreakLabel = computed(() =>
-    this.i18n.t('progress.streak.days_short', {
-      days: this.effectiveSnapshot().longestStreakDays
-    })
-  );
-
-  protected readonly materialsLabel = computed(() =>
-    `${this.effectiveSnapshot().materialsViewed}`
-  );
-
-  protected readonly lastActiveLabel = computed(() => {
-    const last = this.effectiveSnapshot().lastActivityAt;
-    if (!last) return this.i18n.t('progress.streak.never');
-    return formatDateTime(last, this.i18n.locale());
+  protected readonly streakDots = computed<readonly StreakDay[]>(() => {
+    const timestamps = this.service
+      .timeline()
+      .map((event) => event.occurredAt);
+    const days = activeDays14(timestamps, this.mountedAtSignal());
+    return days.map((day) => ({
+      iso: day.dayKey,
+      active: day.active,
+      today: day.today,
+      ariaLabel: this.i18n.t('progress.streak.dayAria', {
+        active: day.active ? 'yes' : 'no',
+        date: formatDateMedium(day.dayKey, this.i18n.locale())
+      })
+    }));
   });
 
-  protected readonly timelineLabels = computed<TimelineLabels>(() => ({
-    headingLabel: this.i18n.t('progress.timeline.title'),
-    leadLabel: this.i18n.t('progress.timeline.lead'),
-    emptyLabel: this.i18n.t('progress.timeline.empty'),
-    scoreDeltaUp: this.i18n.t('progress.timeline.delta.up'),
-    scoreDeltaDown: this.i18n.t('progress.timeline.delta.down'),
-    scoreDeltaFlat: this.i18n.t('progress.timeline.delta.flat'),
-    kindAssessed: this.i18n.t('progress.timeline.kind.assessed'),
-    kindLesson: this.i18n.t('progress.timeline.kind.lesson'),
-    kindMaterial: this.i18n.t('progress.timeline.kind.material'),
-    kindSkill: this.i18n.t('progress.timeline.kind.skill'),
-    kindMilestone: this.i18n.t('progress.timeline.kind.milestone'),
-    listAriaLabel: this.i18n.t('progress.timeline.list.aria'),
-    rowCountLabel: (count: number) =>
-      this.i18n.t('progress.timeline.count', { count })
-  }));
-
-  protected readonly goalLabels = computed<GoalListLabels>(() => ({
-    headingLabel: this.i18n.t('progress.goals.title'),
-    leadLabel: this.i18n.t('progress.goals.lead'),
-    emptyLabel: this.i18n.t('progress.goals.empty'),
-    refreshLabel: this.i18n.t('progress.goals.refresh'),
-    originAzure: this.i18n.t('progress.goals.origin.azure'),
-    originHeuristic: this.i18n.t('progress.goals.origin.heuristic'),
-    milestonesHeading: this.i18n.t('progress.milestones.title'),
-    milestonesEmpty: this.i18n.t('progress.milestones.empty'),
-    targetLabel: (target: string) =>
-      this.i18n.t('progress.goals.target', { target })
-  }));
-
-  /**
-   * Resolves i18n sentinels written into timeline events' `summary`. The
-   * projection layer tags events with `key:arg` so the component can fan out
-   * translations without leaking i18n concerns into the pure pipeline.
-   */
-  protected readonly resolvedTimeline = computed<readonly TimelineEvent[]>(
-    () => {
-      const events = this.service.timeline();
-      return events.map((event) => ({
-        ...event,
-        summary: this.resolveSummary(event)
-      }));
-    }
+  protected readonly currentLevelLabel = computed(() =>
+    this.i18n.t('progress.level.current', {
+      bucket: this.service.snapshot()?.level ?? 'A1'
+    })
   );
 
-  async refreshGoals(): Promise<void> {
-    this.refreshingSignal.set(true);
-    try {
-      await this.service.refreshGoals();
-      this.announcer.announce(
-        this.i18n.t('progress.goals.refreshed'),
-        'polite'
-      );
-    } finally {
-      this.refreshingSignal.set(false);
+  protected readonly levelCaption = computed(() => {
+    const snapshot = this.service.snapshot();
+    const level = snapshot?.level ?? 'A1';
+    if (isAtCap(level)) return this.i18n.t('progress.level.atCap');
+    return this.i18n.t('progress.level.nextHint', {
+      sessionsEstimate: estimateSessionsToNext(snapshot?.overallScore ?? 0),
+      nextBucket: nextBucketCode(level)
+    });
+  });
+
+  protected readonly railPct = computed(() =>
+    railPosition(
+      this.service.snapshot()?.level ?? 'A1',
+      bucketProgress(this.service.snapshot()?.overallScore ?? 0)
+    )
+  );
+
+  protected readonly nextPct = computed(() =>
+    nextBucketPct(this.service.snapshot()?.level ?? 'A1')
+  );
+
+  protected readonly atCap = computed(() =>
+    isAtCap(this.service.snapshot()?.level ?? 'A1')
+  );
+
+  protected readonly railAriaLabel = computed(() =>
+    this.i18n.t('progress.level.railAria', {
+      bucket: this.service.snapshot()?.level ?? 'A1',
+      percent: this.railPct()
+    })
+  );
+
+  protected readonly bucketLabels = computed<readonly RailBucketLabel[]>(() => {
+    const current = this.service.snapshot()?.level ?? 'A1';
+    const anchor = isAtCap(current) ? 'C1' : current;
+    return RAIL_BUCKETS.map((code) => ({
+      code,
+      current: code === anchor
+    }));
+  });
+
+  protected readonly recentSessions = computed<readonly LibraryLesson[]>(() => {
+    const completed = this.library
+      .lessons()
+      .filter((l) => !!l.completedAt)
+      .slice()
+      .sort((a, b) => (a.completedAt! < b.completedAt! ? 1 : -1));
+    return completed.slice(0, RECENT_SESSIONS_LIMIT);
+  });
+
+  protected readonly skillBars = computed<readonly SkillBar[]>(() => {
+    const counts = this.monthSkillCounts();
+    const max = Math.max(counts.listen, counts.speak, counts.read, counts.write);
+    const order: readonly SkillShareKey[] = ['listen', 'speak', 'read', 'write'];
+    return order.map((key) => {
+      const share = max === 0 ? 0 : Math.round((counts[key] / max) * 100);
+      const label = this.i18n.t(`progress.skills.${key}` as I18nKey);
+      return {
+        key,
+        label,
+        share,
+        ariaLabel: this.i18n.t('progress.skills.barAria', {
+          skill: label,
+          share
+        })
+      };
+    });
+  });
+
+  protected readonly skillsEmpty = computed(() => {
+    const counts = this.monthSkillCounts();
+    return counts.listen + counts.speak + counts.read + counts.write === 0;
+  });
+
+  protected readonly rowLabels = computed(() => ({
+    duration: this.i18n.t('materials.row.duration', { minutes: 0 }),
+    progressAria: this.i18n.t('materials.row.progressAria', { percent: 0 }),
+    actionByType: {
+      resume: this.i18n.t('materials.row.action.resume'),
+      review: this.i18n.t('materials.row.action.review'),
+      open: this.i18n.t('materials.row.action.open')
+    },
+    levelAria: (level: string) =>
+      this.i18n.t('materials.card.level.aria', { level })
+  }));
+
+  protected skillLabel(lesson: LibraryLesson): string {
+    return this.i18n.t(`materials.filter.skill.${lesson.skill}` as I18nKey);
+  }
+
+  protected durationText(lesson: LibraryLesson): string {
+    return this.i18n.t('materials.row.duration', {
+      minutes: lesson.durationMinutes
+    });
+  }
+
+  protected rowProgressAria(lesson: LibraryLesson): string {
+    return this.i18n.t('materials.row.progressAria', {
+      percent: Math.round(lesson.progress)
+    });
+  }
+
+  private monthSkillCounts(): Readonly<Record<SkillShareKey, number>> {
+    const cutoff = this.mountedAtSignal() - MONTH_MS;
+    const counts: Record<SkillShareKey, number> = {
+      listen: 0,
+      speak: 0,
+      read: 0,
+      write: 0
+    };
+    for (const lesson of this.library.lessons()) {
+      if (!lesson.completedAt) continue;
+      const ms = Date.parse(lesson.completedAt);
+      if (Number.isNaN(ms) || ms < cutoff) continue;
+      const mapped = mapLibrarySkill(lesson.skill);
+      if (mapped) counts[mapped] += 1;
     }
+    return counts;
   }
 
-  private resolveSummary(event: TimelineEvent): string {
-    const raw = event.summary;
-    const [key, ...rest] = raw.split(':');
-    switch (key) {
-      case 'progress.timeline.lesson': {
-        const [level, topic] = rest;
-        return this.i18n.t('progress.timeline.lesson.summary', {
-          level,
-          topic: this.topicLabel(topic as MaterialTopic)
-        });
+  private pickBucketText(
+    bucket: HeroBucket,
+    userId: string,
+    dayIso: string
+  ): string | null {
+    const variants = this.enumerateBucketVariants(bucket);
+    if (variants.length < MIN_HERO_VARIANTS) return null;
+    const index = pickHeroIndex(userId, dayIso, variants.length);
+    return variants[index];
+  }
+
+  private enumerateBucketVariants(bucket: HeroBucket): readonly string[] {
+    const catalog = this.i18n.catalog() as Record<string, string>;
+    const found: string[] = [];
+    for (let i = 1; i <= MAX_HERO_VARIANTS; i++) {
+      const key = `progress.hero.${bucket}.${i}` as I18nKey;
+      const value = catalog[key];
+      if (typeof value === 'string' && value.length > 0) {
+        found.push(value);
       }
-      case 'progress.timeline.material': {
-        const [kind] = rest;
-        return this.i18n.t('progress.timeline.material.summary', {
-          kind: this.materialKindLabel(kind as MaterialKind)
-        });
-      }
-      case 'progress.timeline.skill': {
-        const [skill] = rest;
-        return this.i18n.t('progress.timeline.skill.summary', {
-          skill: this.i18n.t(`assessment.skill.${skill}` as I18nKey)
-        });
-      }
-      case 'assessment.result.announced': {
-        const [level] = rest;
-        return this.i18n.t('assessment.result.announced', { level });
-      }
-      default:
-        return raw;
     }
+    return found;
   }
 
-  private topicLabel(topic: MaterialTopic): string {
-    return this.i18n.t(`materials.topic.${topic}` as I18nKey);
-  }
-
-  private materialKindLabel(kind: MaterialKind): string {
-    return this.i18n.t(`materials.kind.${kind}` as I18nKey);
+  private readonly warned = new Set<HeroBucket>();
+  private warnUnderfilled(bucket: HeroBucket): void {
+    if (!isDevMode()) return;
+    if (this.warned.has(bucket)) return;
+    this.warned.add(bucket);
+    // eslint-disable-next-line no-console
+    console.warn(`progress.hero.${bucket} underfilled`);
   }
 }
 
-function formatDateTime(iso: string, locale: SupportedLocale): string {
-  const parsed = Date.parse(iso);
-  if (Number.isNaN(parsed)) return iso;
+function bucketProgress(overallScore: number): number {
+  // The projection stores overallScore as [0..1] across A1..C2 (6 tiers).
+  // Each A-bucket maps to ~0.167 of the 0..1 score window. Expand that to
+  // the C1-terminal rail: the fractional position inside the active bucket
+  // is the remainder after removing whole-bucket widths.
+  if (Number.isNaN(overallScore)) return 0;
+  const clamped = Math.max(0, Math.min(1, overallScore));
+  const bucketWidth = 1 / 6;
+  const frac = (clamped % bucketWidth) / bucketWidth;
+  return frac;
+}
+
+function estimateSessionsToNext(overallScore: number): number {
+  // Rough, spec-compliant projection: use 8 as the base session count and
+  // scale down as the bucket gets filled. At bucketProgress = 0 we report ~8;
+  // at bucketProgress ≥ 0.95 we report 1.
+  const frac = bucketProgress(overallScore);
+  const remaining = Math.max(0.05, 1 - frac);
+  return Math.max(1, Math.round(remaining * 8));
+}
+
+function mapLibrarySkill(skill: string): SkillShareKey | null {
+  switch (skill) {
+    case 'listening': return 'listen';
+    case 'speaking': return 'speak';
+    case 'reading': return 'read';
+    case 'writing': return 'write';
+    default: return null;
+  }
+}
+
+function formatDateMedium(dayKey: string, locale: SupportedLocale): string {
+  const parsed = Date.parse(`${dayKey}T00:00:00Z`);
+  if (Number.isNaN(parsed)) return dayKey;
   const d = new Date(parsed);
   const tag = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
-  return d.toLocaleString(tag, {
+  return d.toLocaleDateString(tag, {
     year: 'numeric',
     month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
+    day: '2-digit'
   });
 }

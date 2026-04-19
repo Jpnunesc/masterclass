@@ -15,6 +15,7 @@ export * from './lib/pipeline/prompt';
 export * from './lib/pipeline/content-store';
 export * from './lib/pipeline/demo-lessons';
 export * from './lib/pipeline/demo-lesson-review';
+export * from './lib/ui/lesson-row.component';
 export * from './lib/clients/azure-openai-content.client';
 export * from './lib/clients/stub-content.client';
 export * from './lib/events/material-events';
