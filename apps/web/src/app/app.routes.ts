@@ -17,6 +17,11 @@ export const APP_ROUTES: Routes = [
       import('@feature/onboarding').then((m) => m.ONBOARDING_ROUTES)
   },
   {
+    path: 'assessment',
+    loadChildren: () =>
+      import('@feature/assessment').then((m) => m.ASSESSMENT_ROUTES)
+  },
+  {
     path: 'classroom',
     loadChildren: () =>
       import('@feature/classroom').then((m) => m.CLASSROOM_ROUTES)
