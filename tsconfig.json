@@ -1,0 +1,44 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": ["ES2022", "dom"],
+    "paths": {
+      "@shared/ui": ["libs/shared/ui/src/index.ts"],
+      "@shared/tokens": ["libs/shared/tokens/src/index.ts"],
+      "@shared/i18n": ["libs/shared/i18n/src/index.ts"],
+      "@shared/a11y": ["libs/shared/a11y/src/index.ts"],
+      "@feature/auth": ["libs/feature/auth/src/index.ts"],
+      "@feature/onboarding": ["libs/feature/onboarding/src/index.ts"],
+      "@feature/classroom": ["libs/feature/classroom/src/index.ts"],
+      "@feature/materials": ["libs/feature/materials/src/index.ts"],
+      "@feature/review": ["libs/feature/review/src/index.ts"],
+      "@feature/progress": ["libs/feature/progress/src/index.ts"],
+      "@feature/profile": ["libs/feature/profile/src/index.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}
