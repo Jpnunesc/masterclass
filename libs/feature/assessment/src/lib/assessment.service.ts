@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { I18nService, type I18nKey } from '@shared/i18n';
+import { I18nService, type I18nKey, type SupportedLocale } from '@shared/i18n';
 
 import {
   INITIAL_ASSESSMENT_STATE,
@@ -173,7 +173,7 @@ function toLevelAssessedEvent(
   assessmentId: string,
   studentId: string,
   result: AssessmentResult,
-  locale: 'en' | 'pt'
+  locale: SupportedLocale
 ): LevelAssessedEvent {
   return {
     schemaVersion: LEVEL_ASSESSED_SCHEMA_VERSION,

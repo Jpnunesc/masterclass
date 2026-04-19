@@ -16,6 +16,11 @@ import {
   type SupportedLocale
 } from '@shared/i18n';
 
+const OPTION_KEYS: Readonly<Record<SupportedLocale, I18nKey>> = {
+  en: 'common.locale.option.en',
+  'pt-BR': 'common.locale.option.pt-BR'
+};
+
 type LayoutMode = 'pill' | 'row';
 
 @Component({
@@ -211,17 +216,16 @@ export class LanguageSelectorComponent {
   protected readonly isRow = (): boolean => this.layout() === 'row';
 
   protected currentCode(): string {
-    return this.i18n.locale().toUpperCase();
+    const loc = this.i18n.locale();
+    return loc === 'pt-BR' ? 'PT' : loc.toUpperCase();
   }
 
   protected currentAria(): string {
-    const key: I18nKey =
-      this.i18n.locale() === 'pt' ? 'common.locale.current.pt' : 'common.locale.current.en';
-    return this.i18n.t(key);
+    return this.i18n.t('common.locale.current', { locale: this.i18n.locale() });
   }
 
   protected optionKey(locale: SupportedLocale): I18nKey {
-    return locale === 'pt' ? 'common.locale.option.pt' : 'common.locale.option.en';
+    return OPTION_KEYS[locale];
   }
 
   protected togglePopover(): void {

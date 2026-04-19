@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 
 import { LIVE_ANNOUNCER } from '@shared/a11y';
-import { I18nService, type I18nKey } from '@shared/i18n';
+import { I18nService, type I18nKey, type SupportedLocale } from '@shared/i18n';
 
 import { emptySnapshot, type TimelineEvent } from './domain/progress.types';
 import { ProgressService } from './progress.service';
@@ -295,11 +295,11 @@ export class ProgressComponent implements OnInit {
   }
 }
 
-function formatDateTime(iso: string, locale: 'en' | 'pt'): string {
+function formatDateTime(iso: string, locale: SupportedLocale): string {
   const parsed = Date.parse(iso);
   if (Number.isNaN(parsed)) return iso;
   const d = new Date(parsed);
-  const tag = locale === 'pt' ? 'pt-BR' : 'en-US';
+  const tag = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
   return d.toLocaleString(tag, {
     year: 'numeric',
     month: 'short',

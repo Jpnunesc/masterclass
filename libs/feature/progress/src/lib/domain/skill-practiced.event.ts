@@ -31,6 +31,6 @@ export function isSkillPracticedEvent(
     typeof v.level === 'string' &&
     typeof v.score === 'number' &&
     typeof v.practicedAt === 'string' &&
-    (v.locale === 'en' || v.locale === 'pt')
+    (v.locale === 'en' || v.locale === 'pt-BR')
   );
 }

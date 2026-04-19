@@ -13,7 +13,7 @@ export function seedDemoSessions(
 ): readonly LessonSession[] {
   const now = Date.now();
   const base = (daysAgo: number): Date => new Date(now - daysAgo * 86_400_000);
-  const pt = locale === 'pt';
+  const pt = locale === 'pt-BR';
 
   const s1Start = base(2);
   const s1End = new Date(s1Start.getTime() + 18 * 60_000);

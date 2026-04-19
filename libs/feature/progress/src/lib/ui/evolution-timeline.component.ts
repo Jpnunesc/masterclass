@@ -12,6 +12,8 @@ import {
   signal
 } from '@angular/core';
 
+import type { SupportedLocale } from '@shared/i18n';
+
 import type { TimelineEvent } from '../domain/progress.types';
 
 export interface TimelineLabels {
@@ -155,7 +157,7 @@ export class ProgressEvolutionTimelineComponent implements OnDestroy {
   @Input({ required: true }) labels!: TimelineLabels;
   @Input() rowHeight = ROW_HEIGHT_PX;
   @Input() viewportHeight = VIEWPORT_HEIGHT_PX;
-  @Input() locale: 'en' | 'pt' = 'en';
+  @Input() locale: SupportedLocale = 'en';
 
   @ViewChild('viewport') private viewport?: ElementRef<HTMLDivElement>;
 
@@ -227,7 +229,7 @@ export class ProgressEvolutionTimelineComponent implements OnDestroy {
     const parsed = Date.parse(iso);
     if (Number.isNaN(parsed)) return iso;
     const d = new Date(parsed);
-    const tag = this.locale === 'pt' ? 'pt-BR' : 'en-US';
+    const tag = this.locale === 'pt-BR' ? 'pt-BR' : 'en-US';
     return d.toLocaleString(tag, {
       month: 'short',
       day: '2-digit',

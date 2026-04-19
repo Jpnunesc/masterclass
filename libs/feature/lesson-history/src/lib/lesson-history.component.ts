@@ -245,7 +245,7 @@ export class LessonHistoryComponent implements OnInit {
   private formatDate(iso: string): string {
     const parsed = Date.parse(iso);
     if (Number.isNaN(parsed)) return iso;
-    const tag = this.i18n.locale() === 'pt' ? 'pt-BR' : 'en-US';
+    const tag = this.i18n.locale() === 'pt-BR' ? 'pt-BR' : 'en-US';
     return new Date(parsed).toLocaleString(tag, {
       year: 'numeric',
       month: 'short',
@@ -258,7 +258,7 @@ export class LessonHistoryComponent implements OnInit {
   private formatTime(iso: string): string {
     const parsed = Date.parse(iso);
     if (Number.isNaN(parsed)) return iso;
-    const tag = this.i18n.locale() === 'pt' ? 'pt-BR' : 'en-US';
+    const tag = this.i18n.locale() === 'pt-BR' ? 'pt-BR' : 'en-US';
     return new Date(parsed).toLocaleTimeString(tag, {
       hour: '2-digit',
       minute: '2-digit'

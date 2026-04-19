@@ -1,5 +1,7 @@
 import { Provider } from '@angular/core';
 
+import type { SupportedLocale } from '@shared/i18n';
+
 import type {
   ExerciseQuestion,
   LessonSection,
@@ -53,7 +55,7 @@ function estimateMinutes(kind: MaterialKind): number {
 
 function buildTitle(prompt: MaterialPrompt): string {
   const topic = humanizeTopic(prompt.topic, prompt.locale);
-  if (prompt.locale === 'pt') {
+  if (prompt.locale === 'pt-BR') {
     switch (prompt.kind) {
       case 'lesson':
         return `Aula ${prompt.level}: ${topic}`;
@@ -79,13 +81,13 @@ function buildTitle(prompt: MaterialPrompt): string {
 
 function buildSummary(prompt: MaterialPrompt): string {
   const topic = humanizeTopic(prompt.topic, prompt.locale);
-  if (prompt.locale === 'pt') {
+  if (prompt.locale === 'pt-BR') {
     return `Material gerado em nível ${prompt.level} sobre ${topic}.`;
   }
   return `Generated material at level ${prompt.level} covering ${topic}.`;
 }
 
-function humanizeTopic(topic: string, locale: 'en' | 'pt'): string {
+function humanizeTopic(topic: string, locale: SupportedLocale): string {
   const en: Record<string, string> = {
     daily_life: 'Daily life',
     travel: 'Travel',
@@ -106,7 +108,7 @@ function humanizeTopic(topic: string, locale: 'en' | 'pt'): string {
     grammar: 'Gramática',
     pronunciation: 'Pronúncia'
   };
-  const dict = locale === 'pt' ? pt : en;
+  const dict = locale === 'pt-BR' ? pt : en;
   return dict[topic] ?? topic;
 }
 
@@ -125,7 +127,7 @@ function buildBody(prompt: MaterialPrompt): MaterialBody {
 
 function lessonSections(prompt: MaterialPrompt): readonly LessonSection[] {
   const topic = humanizeTopic(prompt.topic, prompt.locale);
-  if (prompt.locale === 'pt') {
+  if (prompt.locale === 'pt-BR') {
     return [
       {
         heading: `Contexto: ${topic}`,
@@ -160,7 +162,7 @@ function lessonSections(prompt: MaterialPrompt): readonly LessonSection[] {
 function vocabularyCards(prompt: MaterialPrompt): readonly VocabularyCard[] {
   const topic = humanizeTopic(prompt.topic, prompt.locale);
   const base: readonly VocabularyCard[] =
-    prompt.locale === 'pt'
+    prompt.locale === 'pt-BR'
       ? [
           {
             term: 'to commute',
@@ -211,7 +213,7 @@ function vocabularyCards(prompt: MaterialPrompt): readonly VocabularyCard[] {
 function exerciseQuestions(
   prompt: MaterialPrompt
 ): readonly ExerciseQuestion[] {
-  if (prompt.locale === 'pt') {
+  if (prompt.locale === 'pt-BR') {
     return [
       {
         prompt: 'Qual é a forma correta do verbo?',
@@ -257,7 +259,7 @@ function exerciseQuestions(
 
 function summaryBullets(prompt: MaterialPrompt): readonly string[] {
   const topic = humanizeTopic(prompt.topic, prompt.locale);
-  if (prompt.locale === 'pt') {
+  if (prompt.locale === 'pt-BR') {
     return [
       `Foco: ${topic} em nível ${prompt.level}.`,
       'Revise três frases-chave que você estudou hoje.',

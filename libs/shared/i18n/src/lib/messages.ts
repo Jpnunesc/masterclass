@@ -1,5 +1,5 @@
 import enMessages from './locales/en.json';
-import ptMessages from './locales/pt.json';
+import ptBrMessages from './locales/pt-BR.json';
 import { type SupportedLocale } from './supported-locales';
 
 /**
@@ -12,5 +12,5 @@ export type MessageCatalog = Readonly<Record<I18nKey, string>>;
 
 export const MESSAGES: Readonly<Record<SupportedLocale, MessageCatalog>> = {
   en: enMessages,
-  pt: ptMessages as MessageCatalog
+  'pt-BR': ptBrMessages as MessageCatalog
 };

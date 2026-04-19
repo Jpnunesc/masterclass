@@ -47,7 +47,7 @@ describe('AppComponent', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.textContent).toContain('Classroom');
 
-    i18n.setLocale('pt');
+    i18n.setLocale('pt-BR');
     fixture.detectChanges();
     expect(el.textContent).toContain('Sala de aula');
     expect(el.textContent).not.toContain('Classroom');

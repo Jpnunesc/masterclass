@@ -25,11 +25,11 @@ export class StubAzureOpenAiGoals implements AzureOpenAiGoals {
     goals.push({
       id: `goal-overall-${target}`,
       title:
-        locale === 'pt'
+        locale === 'pt-BR'
           ? `Alcance o nível ${target}`
           : `Reach level ${target}`,
       detail:
-        locale === 'pt'
+        locale === 'pt-BR'
           ? `Continue praticando para subir de ${snapshot.level} para ${target}.`
           : `Keep practising to move from ${snapshot.level} to ${target}.`,
       targetSkill: 'overall',
@@ -44,11 +44,11 @@ export class StubAzureOpenAiGoals implements AzureOpenAiGoals {
     goals.push({
       id: `goal-skill-${weakest}`,
       title:
-        locale === 'pt'
+        locale === 'pt-BR'
           ? `Reforce ${skillLabelPt(weakest)}`
           : `Strengthen ${skillLabelEn(weakest)}`,
       detail:
-        locale === 'pt'
+        locale === 'pt-BR'
           ? `Dedique 3 sessões curtas a ${skillLabelPt(weakest)} esta semana.`
           : `Spend three short sessions on ${skillLabelEn(weakest)} this week.`,
       targetSkill: weakest,
@@ -62,9 +62,9 @@ export class StubAzureOpenAiGoals implements AzureOpenAiGoals {
 
     goals.push({
       id: 'goal-streak-7',
-      title: locale === 'pt' ? 'Sequência de 7 dias' : '7-day streak',
+      title: locale === 'pt-BR' ? 'Sequência de 7 dias' : '7-day streak',
       detail:
-        locale === 'pt'
+        locale === 'pt-BR'
           ? 'Faça ao menos uma aula por dia durante uma semana.'
           : 'Complete at least one lesson every day for a week.',
       targetSkill: 'overall',

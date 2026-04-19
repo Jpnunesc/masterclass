@@ -42,7 +42,7 @@ export function isMaterialGeneratedEvent(
     typeof v.kind === 'string' &&
     typeof v.level === 'string' &&
     typeof v.topic === 'string' &&
-    (v.locale === 'en' || v.locale === 'pt') &&
+    (v.locale === 'en' || v.locale === 'pt-BR') &&
     typeof v.promptHash === 'string' &&
     typeof v.version === 'number' &&
     typeof v.generatedAt === 'string' &&

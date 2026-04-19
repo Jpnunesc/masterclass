@@ -36,7 +36,7 @@ export function isLessonCompletedEvent(
     typeof v.level === 'string' &&
     typeof v.topic === 'string' &&
     typeof v.kind === 'string' &&
-    (v.locale === 'en' || v.locale === 'pt') &&
+    (v.locale === 'en' || v.locale === 'pt-BR') &&
     typeof v.completedAt === 'string' &&
     typeof v.durationSeconds === 'number' &&
     typeof v.score === 'number'

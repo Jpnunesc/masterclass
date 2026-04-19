@@ -1,3 +1,5 @@
+import type { SupportedLocale } from '@shared/i18n';
+
 import type { CefrLevel } from './cefr';
 import type { AssessmentSkill, AssessmentSubScore } from './assessment.types';
 
@@ -24,7 +26,7 @@ export interface LevelAssessedEvent {
   readonly subScores: Readonly<Record<AssessmentSubScore, number>>;
   readonly startedAt: string;
   readonly completedAt: string;
-  readonly locale: 'en' | 'pt';
+  readonly locale: SupportedLocale;
 }
 
 export function isLevelAssessedEvent(value: unknown): value is LevelAssessedEvent {
@@ -42,6 +44,6 @@ export function isLevelAssessedEvent(value: unknown): value is LevelAssessedEven
     !!v.subScores &&
     typeof v.startedAt === 'string' &&
     typeof v.completedAt === 'string' &&
-    (v.locale === 'en' || v.locale === 'pt')
+    (v.locale === 'en' || v.locale === 'pt-BR')
   );
 }

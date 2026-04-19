@@ -2,14 +2,14 @@ import { ApplicationConfig, LOCALE_ID, inject, provideZoneChangeDetection } from
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { registerLocaleData } from '@angular/common';
 import localeEn from '@angular/common/locales/en';
-import localePt from '@angular/common/locales/pt';
+import localePtBr from '@angular/common/locales/pt';
 import { I18nService } from '@shared/i18n';
 import { provideLiveAnnouncer } from '@shared/a11y';
 
 import { APP_ROUTES } from './app.routes';
 
 registerLocaleData(localeEn, 'en');
-registerLocaleData(localePt, 'pt');
+registerLocaleData(localePtBr, 'pt-BR');
 
 export const appConfig: ApplicationConfig = {
   providers: [

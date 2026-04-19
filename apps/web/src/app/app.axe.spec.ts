@@ -43,7 +43,7 @@ describe('axe — app shell a11y baseline', () => {
   });
 
   it('AppComponent shell has no axe violations (pt)', async () => {
-    TestBed.inject(I18nService).setLocale('pt');
+    TestBed.inject(I18nService).setLocale('pt-BR');
     const fixture = await renderIntoDocument(AppComponent);
     const results = await runAxe(fixture.nativeElement);
     expectNoAxeViolations(results);

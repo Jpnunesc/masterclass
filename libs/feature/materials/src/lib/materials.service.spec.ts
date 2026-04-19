@@ -54,7 +54,7 @@ describe('MaterialsService (contract)', () => {
       kind: 'lesson',
       level: 'B1',
       topic: 'travel',
-      locale: 'pt'
+      locale: 'pt-BR'
     });
     const c = await svc.generate({
       studentId: 's1',

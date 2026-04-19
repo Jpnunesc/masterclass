@@ -7,6 +7,7 @@ import {
   type LevelAssessedEvent
 } from '@feature/assessment';
 import type { MaterialViewedEvent } from '@feature/materials';
+import type { SupportedLocale } from '@shared/i18n';
 
 import type { LessonCompletedEvent } from '../domain/lesson-completed.event';
 import type { SkillPracticedEvent } from '../domain/skill-practiced.event';
@@ -270,27 +271,27 @@ function maybeAddMilestone(
   previous: CefrLevel,
   current: CefrLevel,
   at: string,
-  locale: 'en' | 'pt'
+  locale: SupportedLocale
 ): readonly Milestone[] {
   if (CEFR_ORDINALS[current] <= CEFR_ORDINALS[previous]) return milestones;
   const id = `milestone-${current}-${at}`;
   if (milestones.some((m) => m.id === id)) return milestones;
   const label =
-    locale === 'pt'
+    locale === 'pt-BR'
       ? `Subiu para ${current}`
       : `Reached ${current}`;
   const detail =
-    locale === 'pt'
+    locale === 'pt-BR'
       ? `Novo nível CEFR atingido em ${formatDay(at, locale)}.`
       : `New CEFR level achieved on ${formatDay(at, locale)}.`;
   return [...milestones, { id, label, detail, reachedAt: at }];
 }
 
-function formatDay(iso: string, locale: 'en' | 'pt'): string {
+function formatDay(iso: string, locale: SupportedLocale): string {
   const parsed = Date.parse(iso);
   if (Number.isNaN(parsed)) return iso;
   const d = new Date(parsed);
-  const tag = locale === 'pt' ? 'pt-BR' : 'en-US';
+  const tag = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
   return d.toLocaleDateString(tag, {
     year: 'numeric',
     month: 'short',
@@ -327,7 +328,7 @@ function higherLevel(a: CefrLevel, b: CefrLevel): CefrLevel {
   return CEFR_ORDINALS[a] >= CEFR_ORDINALS[b] ? a : b;
 }
 
-function inferLocale(state: ProjectionState): 'en' | 'pt' {
+function inferLocale(state: ProjectionState): SupportedLocale {
   const newest = state.timeline[0];
   return newest?.locale ?? 'en';
 }

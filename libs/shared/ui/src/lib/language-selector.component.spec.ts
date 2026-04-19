@@ -58,15 +58,15 @@ describe('LanguageSelectorComponent', () => {
     ptItem.click();
     fixture.detectChanges();
 
-    expect(i18n.locale()).toBe('pt');
-    expect(doc.documentElement.getAttribute('lang')).toBe('pt');
+    expect(i18n.locale()).toBe('pt-BR');
+    expect(doc.documentElement.getAttribute('lang')).toBe('pt-BR');
   });
 
   it('keeps item labels in their native script regardless of UI locale', () => {
     const fixture = TestBed.createComponent(LanguageSelectorComponent);
     const i18n = TestBed.inject(I18nService);
 
-    i18n.setLocale('pt');
+    i18n.setLocale('pt-BR');
     fixture.detectChanges();
     (fixture.nativeElement.querySelector('.mc-lang__trigger') as HTMLButtonElement).click();
     fixture.detectChanges();

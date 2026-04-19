@@ -51,11 +51,11 @@ export function buildMaterialPrompt(
   input: GenerateMaterialInput
 ): MaterialPrompt {
   const sys =
-    input.locale === 'pt'
+    input.locale === 'pt-BR'
       ? SYSTEM_BY_KIND_PT[input.kind]
       : SYSTEM_BY_KIND_EN[input.kind];
   const user =
-    input.locale === 'pt'
+    input.locale === 'pt-BR'
       ? `Gere um material do tipo "${input.kind}" no nível CEFR ${input.level} sobre o tópico "${input.topic}". Responda em JSON estrito, sem texto extra.`
       : `Generate a "${input.kind}" material at CEFR level ${input.level} on the topic "${input.topic}". Reply with strict JSON, no extra prose.`;
   const canonical = canonicalize({

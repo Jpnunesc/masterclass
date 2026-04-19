@@ -37,22 +37,24 @@ import {
     <a class="mc-skip-link" href="#main">{{ i18n.t('common.a11y.skipToContent') }}</a>
 
     <div class="mc-app" [attr.data-locale]="i18n.locale()">
-      <header class="mc-app__header" role="banner">
-        @if (bp.atLeastLg()) {
-          <mc-top-nav
-            [profileName]="profileName()"
-            (openProfile)="onOpenProfile()"
-          />
-        } @else {
-          <div class="mc-app__header-mobile">
-            <mc-app-drawer-trigger
-              [open]="drawerOpen()"
-              (openClicked)="openDrawer()"
+      @if (showHeader()) {
+        <header class="mc-app__header" role="banner">
+          @if (bp.atLeastLg()) {
+            <mc-top-nav
+              [profileName]="profileName()"
+              (openProfile)="onOpenProfile()"
             />
-            <mc-product-mark [ariaLabel]="i18n.t('common.brand.name')" />
-          </div>
-        }
-      </header>
+          } @else {
+            <div class="mc-app__header-mobile">
+              <mc-app-drawer-trigger
+                [open]="drawerOpen()"
+                (openClicked)="openDrawer()"
+              />
+              <mc-product-mark [ariaLabel]="i18n.t('common.brand.name')" />
+            </div>
+          }
+        </header>
+      }
 
       <main class="mc-app__main" id="main" tabindex="-1">
         <router-outlet />
@@ -63,7 +65,7 @@ import {
       }
     </div>
 
-    @if (!bp.atLeastLg()) {
+    @if (showHeader() && !bp.atLeastLg()) {
       <mc-app-drawer
         [open]="drawerOpen()"
         [profileName]="profileName()"
@@ -130,8 +132,14 @@ export class AppComponent {
 
   private readonly currentUrl = signal<string>(this.router.url);
 
+  private readonly isChromeless = computed(() => {
+    const u = this.currentUrl();
+    return u.startsWith('/auth') || u.startsWith('/onboarding');
+  });
+
+  protected readonly showHeader = computed(() => !this.isChromeless());
   protected readonly showFooter = computed(
-    () => !this.currentUrl().startsWith('/classroom')
+    () => !this.isChromeless() && !this.currentUrl().startsWith('/classroom')
   );
 
   protected readonly profileName = computed(

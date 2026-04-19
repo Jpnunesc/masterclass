@@ -22,7 +22,7 @@ const ROOT = path.resolve(__dirname, '..');
 
 const LOCALES_DIR = path.join(ROOT, 'libs/shared/i18n/src/lib/locales');
 const EN_PATH = path.join(LOCALES_DIR, 'en.json');
-const PT_PATH = path.join(LOCALES_DIR, 'pt.json');
+const PT_PATH = path.join(LOCALES_DIR, 'pt-BR.json');
 
 const SCAN_DIRS = [
   path.join(ROOT, 'libs/feature'),
