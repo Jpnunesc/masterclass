@@ -9,7 +9,6 @@ describe('LanguageSelectorComponent', () => {
 
   beforeEach(() => {
     doc = document;
-    // Ensure the real document has a clean lang + clean storage for isolation.
     doc.documentElement.removeAttribute('lang');
     localStorage.removeItem('mc.locale');
     TestBed.configureTestingModule({
@@ -18,34 +17,64 @@ describe('LanguageSelectorComponent', () => {
     });
   });
 
-  it('switches the I18nService locale when the user picks a language', () => {
+  it('renders the current locale code on the pill trigger', () => {
+    const i18n = TestBed.inject(I18nService);
+    i18n.setLocale('en');
+    const fixture = TestBed.createComponent(LanguageSelectorComponent);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector('.mc-lang__trigger') as HTMLButtonElement;
+    expect(trigger).toBeTruthy();
+    expect(trigger.textContent?.trim()).toContain('EN');
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('opens the popover on trigger click and exposes aria-expanded=true', () => {
+    const fixture = TestBed.createComponent(LanguageSelectorComponent);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector('.mc-lang__trigger') as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    const menu = fixture.nativeElement.querySelector('.mc-lang__menu');
+    expect(menu).toBeTruthy();
+    const items = menu.querySelectorAll('.mc-lang__item');
+    expect(items.length).toBe(2);
+  });
+
+  it('switches I18nService locale when the user picks a language item', () => {
     const fixture = TestBed.createComponent(LanguageSelectorComponent);
     const i18n = TestBed.inject(I18nService);
+    i18n.setLocale('en');
     fixture.detectChanges();
 
-    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
-    expect(select).toBeTruthy();
+    const trigger = fixture.nativeElement.querySelector('.mc-lang__trigger') as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
 
-    select.value = 'pt';
-    select.dispatchEvent(new Event('change'));
+    const ptItem = Array.from(
+      fixture.nativeElement.querySelectorAll('.mc-lang__item')
+    ).find((el) => (el as HTMLElement).textContent?.includes('Português')) as HTMLButtonElement;
+    ptItem.click();
     fixture.detectChanges();
 
     expect(i18n.locale()).toBe('pt');
     expect(doc.documentElement.getAttribute('lang')).toBe('pt');
   });
 
-  it('rerenders selector labels live when locale changes (no reload)', () => {
+  it('keeps item labels in their native script regardless of UI locale', () => {
     const fixture = TestBed.createComponent(LanguageSelectorComponent);
     const i18n = TestBed.inject(I18nService);
 
-    i18n.setLocale('en');
-    fixture.detectChanges();
-    const labelInEn = fixture.nativeElement.querySelector('.mc-caption').textContent.trim();
-    expect(labelInEn).toBe('Language');
-
     i18n.setLocale('pt');
     fixture.detectChanges();
-    const labelInPt = fixture.nativeElement.querySelector('.mc-caption').textContent.trim();
-    expect(labelInPt).toBe('Idioma');
+    (fixture.nativeElement.querySelector('.mc-lang__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const items = Array.from(fixture.nativeElement.querySelectorAll('.mc-lang__item'))
+      .map((el) => (el as HTMLElement).textContent?.trim())
+      .join(' | ');
+    expect(items).toContain('English');
+    expect(items).toContain('Português (Brasil)');
   });
 });

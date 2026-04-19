@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { impersonateLearnerGuard } from '@feature/auth';
 
 export const APP_ROUTES: Routes = [
   {
@@ -23,30 +24,36 @@ export const APP_ROUTES: Routes = [
   },
   {
     path: 'classroom',
+    canActivate: [impersonateLearnerGuard],
     loadChildren: () =>
       import('@feature/classroom').then((m) => m.CLASSROOM_ROUTES)
   },
   {
     path: 'materials',
+    canActivate: [impersonateLearnerGuard],
     loadChildren: () =>
       import('@feature/materials').then((m) => m.MATERIALS_ROUTES)
   },
   {
     path: 'review',
+    canActivate: [impersonateLearnerGuard],
     loadChildren: () => import('@feature/review').then((m) => m.REVIEW_ROUTES)
   },
   {
     path: 'progress',
+    canActivate: [impersonateLearnerGuard],
     loadChildren: () =>
       import('@feature/progress').then((m) => m.PROGRESS_ROUTES)
   },
   {
     path: 'history',
+    canActivate: [impersonateLearnerGuard],
     loadChildren: () =>
       import('@feature/lesson-history').then((m) => m.LESSON_HISTORY_ROUTES)
   },
   {
     path: 'profile',
+    canActivate: [impersonateLearnerGuard],
     loadChildren: () =>
       import('@feature/profile').then((m) => m.PROFILE_ROUTES)
   },

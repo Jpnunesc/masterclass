@@ -159,6 +159,39 @@
   --mc-reading-max: 42rem;
   --mc-sidebar-w: 18rem;
   --mc-header-h: 4rem;
+
+  /* ---------- Shell layout (SEV-16) ---------- */
+  --mc-shell-header-h: 4rem;   /* 64 */
+  --mc-shell-footer-h: 3rem;   /* 48 */
+  --mc-shell-nav-max: 70rem;   /* 1120 — content column */
+  --mc-shell-outlet-min: calc(100vh - var(--mc-shell-header-h) - var(--mc-shell-footer-h));
+
+  /* ---------- Foundations §1 aliases (SEV-3 spec vocabulary) ---------- */
+  --mc-bg: var(--mc-surface-canvas);
+  --mc-bg-raised: var(--mc-surface-raised);
+  --mc-bg-inset: var(--mc-surface-muted);
+  --mc-ink: var(--mc-text-primary);
+  --mc-ink-muted: var(--mc-text-secondary);
+  --mc-ink-faint: var(--mc-text-muted);
+  --mc-line: var(--mc-border-subtle);
+  --mc-line-strong: var(--mc-border-strong);
+  --mc-accent: var(--mc-accent-500);
+  --mc-accent-ink: var(--mc-accent-on);
+  --mc-accent-soft: var(--mc-accent-100);
+  --mc-elev-0: var(--mc-elevation-0);
+  --mc-elev-1: var(--mc-elevation-1);
+  --mc-elev-2: var(--mc-elevation-2);
+  --mc-dur-1: var(--mc-duration-1);
+  --mc-dur-2: var(--mc-duration-2);
+  --mc-dur-3: var(--mc-duration-3);
+  --mc-dur-4: var(--mc-duration-4);
+  --mc-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --mc-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --mc-scrim: rgba(27, 26, 23, 0.32);
+}
+
+[data-theme='dark'] {
+  --mc-scrim: rgba(0, 0, 0, 0.56);
 }
 
 /* ---------- Density variants ---------- */

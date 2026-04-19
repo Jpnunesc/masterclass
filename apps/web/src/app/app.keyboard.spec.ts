@@ -3,12 +3,20 @@ import { provideRouter } from '@angular/router';
 import { getKeyboardFocusOrder } from '@shared/a11y/testing';
 
 import { AppComponent } from './app.component';
+import { BreakpointService } from './ui/shell';
+
+class DesktopBreakpointStub {
+  readonly atLeastLg = () => true;
+}
 
 describe('keyboard-only navigation smoke test', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([])]
+      providers: [
+        provideRouter([]),
+        { provide: BreakpointService, useClass: DesktopBreakpointStub }
+      ]
     }).compileComponents();
   });
 
@@ -26,14 +34,14 @@ describe('keyboard-only navigation smoke test', () => {
 
     const first = order[0];
     expect(first.classList.contains('mc-skip-link')).toBeTrue();
-    expect(first.getAttribute('href')).toBe('#mc-main');
+    expect(first.getAttribute('href')).toBe('#main');
 
     const textContent = order.map((el) => el.textContent?.trim()).join(' | ');
-    ['Classroom', 'Materials', 'Progress', 'Profile'].forEach((label) => {
+    ['Classroom', 'Materials', 'Progress'].forEach((label) => {
       expect(textContent).toContain(label);
     });
 
-    const main = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('#mc-main');
+    const main = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('#main');
     expect(main?.getAttribute('tabindex')).toBe('-1');
 
     main?.focus();

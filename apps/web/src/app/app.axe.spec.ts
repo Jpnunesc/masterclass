@@ -5,6 +5,11 @@ import { expectNoAxeViolations, runAxe } from '@shared/a11y/testing';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './shell/home.component';
+import { BreakpointService } from './ui/shell';
+
+class DesktopBreakpointStub {
+  readonly atLeastLg = () => true;
+}
 
 async function renderIntoDocument<T>(component: new (...args: unknown[]) => T) {
   const fixture = TestBed.createComponent(component);
@@ -18,7 +23,10 @@ describe('axe — app shell a11y baseline', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent, HomeComponent],
-      providers: [provideRouter([])]
+      providers: [
+        provideRouter([]),
+        { provide: BreakpointService, useClass: DesktopBreakpointStub }
+      ]
     }).compileComponents();
   });
 

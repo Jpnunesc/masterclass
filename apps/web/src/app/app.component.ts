@@ -1,147 +1,165 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/operators';
+
 import { I18nService } from '@shared/i18n';
-import { LanguageSelectorComponent } from '@shared/ui';
-import { Density, ThemeService, densities } from '@shared/tokens';
+import { LearnerSessionService } from '@feature/auth';
+
+import {
+  AppDrawerComponent,
+  AppFooterComponent,
+  BreakpointService,
+  DrawerTriggerComponent,
+  ProductMarkComponent,
+  TopNavComponent
+} from './ui/shell';
 
 @Component({
   selector: 'mc-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, LanguageSelectorComponent],
+  imports: [
+    RouterOutlet,
+    TopNavComponent,
+    DrawerTriggerComponent,
+    AppDrawerComponent,
+    AppFooterComponent,
+    ProductMarkComponent
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a class="mc-skip-link" href="#mc-main">{{ i18n.t('app.skip_link') }}</a>
-    <header class="mc-app-header" role="banner">
-      <a routerLink="/" class="mc-brand" [attr.aria-label]="i18n.t('app.brand.aria')">
-        <span class="mc-brand-lead">{{ i18n.t('app.brand.lead') }}</span>
-        <strong class="mc-brand-mark">{{ i18n.t('app.brand.mark') }}</strong>
-      </a>
-      <nav [attr.aria-label]="i18n.t('app.nav.aria')" class="mc-nav">
-        <a routerLink="/classroom">{{ i18n.t('app.nav.classroom') }}</a>
-        <a routerLink="/materials">{{ i18n.t('app.nav.materials') }}</a>
-        <a routerLink="/progress">{{ i18n.t('app.nav.progress') }}</a>
-        <a routerLink="/history">{{ i18n.t('app.nav.history') }}</a>
-        <a routerLink="/profile">{{ i18n.t('app.nav.profile') }}</a>
-        <a routerLink="/sandbox/tokens" class="mc-nav-secondary">{{ i18n.t('app.nav.tokens') }}</a>
-      </nav>
-      <div class="mc-app-controls mc-inline">
-        <mc-language-selector />
-        <label class="mc-inline mc-body-sm">
-          <span class="mc-caption">{{ i18n.t('app.density.label') }}</span>
-          <select
-            class="mc-select"
-            [attr.aria-label]="i18n.t('app.density.aria')"
-            [value]="theme.density()"
-            (change)="onDensityChange($any($event.target).value)"
-          >
-            @for (d of densityOptions; track d) {
-              <option [value]="d">{{ d }}</option>
-            }
-          </select>
-        </label>
-        <button
-          type="button"
-          class="mc-btn mc-btn-ghost"
-          (click)="theme.toggleTheme()"
-          [attr.aria-pressed]="theme.theme() === 'dark'"
-          [attr.aria-label]="i18n.t('app.theme.toggle_aria')"
-        >
-          {{ theme.theme() === 'dark' ? i18n.t('app.theme.dark') : i18n.t('app.theme.light') }}
-        </button>
-      </div>
-    </header>
-    <main id="mc-main" class="mc-app-main" tabindex="-1">
-      <router-outlet />
-    </main>
+    <a class="mc-skip-link" href="#main">{{ i18n.t('common.a11y.skipToContent') }}</a>
+
+    <div class="mc-app" [attr.data-locale]="i18n.locale()">
+      <header class="mc-app__header" role="banner">
+        @if (bp.atLeastLg()) {
+          <mc-top-nav
+            [profileName]="profileName()"
+            (openProfile)="onOpenProfile()"
+          />
+        } @else {
+          <div class="mc-app__header-mobile">
+            <mc-app-drawer-trigger
+              [open]="drawerOpen()"
+              (openClicked)="openDrawer()"
+            />
+            <mc-product-mark [ariaLabel]="i18n.t('common.brand.name')" />
+          </div>
+        }
+      </header>
+
+      <main class="mc-app__main" id="main" tabindex="-1">
+        <router-outlet />
+      </main>
+
+      @if (showFooter()) {
+        <mc-app-footer />
+      }
+    </div>
+
+    @if (!bp.atLeastLg()) {
+      <mc-app-drawer
+        [open]="drawerOpen()"
+        [profileName]="profileName()"
+        (closed)="closeDrawer()"
+        (openProfile)="onOpenProfile()"
+      />
+    }
   `,
   styles: [
     `
       :host {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
+        display: block;
+        min-height: 100dvh;
       }
       .mc-skip-link {
         position: absolute;
         left: -9999px;
         top: 0;
+        z-index: 100;
       }
       .mc-skip-link:focus {
         left: var(--mc-space-4);
         top: var(--mc-space-4);
-        background: var(--mc-surface-inverse);
-        color: var(--mc-text-inverse);
-        padding: var(--mc-space-2) var(--mc-space-4);
-        border-radius: var(--mc-radius-sm);
-        z-index: 100;
+        padding: var(--mc-space-2) var(--mc-space-3);
+        background: var(--mc-bg-raised);
+        color: var(--mc-ink);
+        border: 1px solid var(--mc-line-strong);
+        border-radius: var(--mc-radius-md);
       }
-      .mc-app-header {
+      .mc-app {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+      }
+      .mc-app__header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: var(--mc-bg);
+        border-block-end: 1px solid var(--mc-line);
+      }
+      .mc-app__header-mobile {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: var(--mc-space-6);
-        padding: var(--mc-space-3) var(--mc-space-6);
-        min-height: var(--mc-header-h);
-        border-bottom: 1px solid var(--mc-border-subtle);
-        background: var(--mc-surface-raised);
+        gap: var(--mc-space-3);
+        height: var(--mc-shell-header-h);
+        padding-inline: var(--mc-space-4);
       }
-      .mc-brand {
-        display: inline-flex;
-        align-items: baseline;
-        gap: var(--mc-space-2);
-        text-decoration: none;
-        color: inherit;
-      }
-      .mc-brand-lead {
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-heading-md);
-        color: var(--mc-text-secondary);
-      }
-      .mc-brand-mark {
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-heading-lg);
-        color: var(--mc-text-primary);
-        font-weight: 400;
-      }
-      .mc-nav {
-        display: inline-flex;
-        gap: var(--mc-space-5);
-      }
-      .mc-nav a {
-        text-decoration: none;
-        color: var(--mc-text-secondary);
-        font-size: var(--mc-fs-body-md);
-      }
-      .mc-nav a:hover {
-        color: var(--mc-text-primary);
-      }
-      .mc-nav-secondary {
-        color: var(--mc-text-muted) !important;
-        font-size: var(--mc-fs-body-sm) !important;
-      }
-      .mc-select {
-        font: inherit;
-        height: var(--mc-control-h);
-        padding: 0 var(--mc-space-3);
-        border-radius: var(--mc-radius-pill);
-        border: 1px solid var(--mc-border-strong);
-        background: var(--mc-surface-raised);
-        color: var(--mc-text-primary);
-      }
-      .mc-app-main {
+      .mc-app__main {
         flex: 1;
-        padding: var(--mc-pad-section) var(--mc-space-6);
+        min-height: var(--mc-shell-outlet-min);
         outline: none;
       }
     `
   ]
 })
 export class AppComponent {
-  protected readonly theme = inject(ThemeService);
   protected readonly i18n = inject(I18nService);
-  protected readonly densityOptions = densities;
+  protected readonly bp = inject(BreakpointService);
+  private readonly router = inject(Router);
+  private readonly session = inject(LearnerSessionService);
 
-  protected onDensityChange(value: string): void {
-    this.theme.setDensity(value as Density);
+  protected readonly drawerOpen = signal(false);
+
+  private readonly currentUrl = signal<string>(this.router.url);
+
+  protected readonly showFooter = computed(
+    () => !this.currentUrl().startsWith('/classroom')
+  );
+
+  protected readonly profileName = computed(
+    () => this.session.identity()?.displayName ?? null
+  );
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe((e) => {
+        this.currentUrl.set(e.urlAfterRedirects);
+        if (this.drawerOpen()) this.drawerOpen.set(false);
+      });
+  }
+
+  protected openDrawer(): void {
+    this.drawerOpen.set(true);
+  }
+
+  protected closeDrawer(): void {
+    this.drawerOpen.set(false);
+  }
+
+  protected onOpenProfile(): void {
+    this.drawerOpen.set(false);
+    void this.router.navigateByUrl('/profile');
   }
 }
