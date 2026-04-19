@@ -1,0 +1,95 @@
+.mc-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mc-space-6);
+  margin-top: var(--mc-space-8);
+  min-height: 264px;
+
+  &__cta {
+    min-width: 240px;
+    align-self: center;
+    margin-top: var(--mc-space-3);
+    width: 100%;
+  }
+  @media (min-width: 768px) { &__cta { width: auto; } }
+
+  &__spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--mc-accent-ink);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: mc-auth-spin 0.8s linear infinite;
+  }
+
+  &__switch {
+    align-self: center;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--mc-text-link);
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  &__switch:hover { color: var(--mc-accent-600); }
+}
+
+@keyframes mc-auth-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mc-auth-form__spinner { animation: none; } }
+
+.mc-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mc-space-2);
+
+  &__label {
+    font-size: var(--mc-fs-caption);
+    letter-spacing: var(--mc-tracking-wide);
+    text-transform: uppercase;
+    color: var(--mc-ink-muted);
+  }
+  &__wrap { position: relative; display: flex; }
+  &__input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 0;
+    border-bottom: 1px solid var(--mc-line-strong);
+    background: transparent;
+    color: var(--mc-ink);
+    font: inherit;
+    font-size: var(--mc-fs-body-lg);
+    padding: 12px 0;
+    border-radius: 0;
+    transition: border-color var(--mc-dur-2) var(--mc-ease-standard);
+  }
+  &__input:hover:not(:focus):not(:disabled) { border-bottom-color: var(--mc-ink-faint); }
+  &__input:focus {
+    outline: none;
+    border: 1px solid var(--mc-accent);
+    border-radius: var(--mc-radius-md);
+    padding: 11px;
+  }
+  &__input--with-affix, &__input--with-affix:focus { padding-right: 2.5rem; }
+  &__input--error { border-bottom-color: var(--mc-status-danger); }
+  &__input--error:focus { border-color: var(--mc-status-danger); }
+  &__input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &__affix {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 0;
+    padding: var(--mc-space-2);
+    color: var(--mc-ink-muted);
+    cursor: pointer;
+  }
+  &__affix:hover { color: var(--mc-ink); }
+  &__help, &__error { margin: 0; font-size: var(--mc-fs-body-sm); }
+  &__help { color: var(--mc-ink-muted); }
+  &__error { color: var(--mc-status-danger); }
+}
