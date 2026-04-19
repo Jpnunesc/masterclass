@@ -20,6 +20,7 @@ import { Density, ThemeService, densities } from '@shared/tokens';
         <a routerLink="/classroom">{{ i18n.t('app.nav.classroom') }}</a>
         <a routerLink="/materials">{{ i18n.t('app.nav.materials') }}</a>
         <a routerLink="/progress">{{ i18n.t('app.nav.progress') }}</a>
+        <a routerLink="/history">{{ i18n.t('app.nav.history') }}</a>
         <a routerLink="/profile">{{ i18n.t('app.nav.profile') }}</a>
         <a routerLink="/sandbox/tokens" class="mc-nav-secondary">{{ i18n.t('app.nav.tokens') }}</a>
       </nav>

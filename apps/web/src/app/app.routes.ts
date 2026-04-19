@@ -41,6 +41,11 @@ export const APP_ROUTES: Routes = [
       import('@feature/progress').then((m) => m.PROGRESS_ROUTES)
   },
   {
+    path: 'history',
+    loadChildren: () =>
+      import('@feature/lesson-history').then((m) => m.LESSON_HISTORY_ROUTES)
+  },
+  {
     path: 'profile',
     loadChildren: () =>
       import('@feature/profile').then((m) => m.PROFILE_ROUTES)
