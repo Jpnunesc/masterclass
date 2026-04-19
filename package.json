@@ -9,7 +9,8 @@
     "build": "ng build web --configuration=production",
     "watch": "ng build web --watch --configuration=development",
     "test": "ng test web --watch=false --browsers=ChromeHeadlessCI",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "check:no-hex": "node tools/check-no-raw-hex.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

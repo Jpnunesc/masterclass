@@ -15,13 +15,21 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   styles: [
     `
       .mc-placeholder {
-        border: 1px dashed rgba(0, 0, 0, 0.2);
-        padding: 1.5rem;
-        border-radius: 0.5rem;
+        border: 1px dashed var(--mc-border-strong);
+        padding: var(--mc-pad-card);
+        border-radius: var(--mc-radius-lg);
         max-width: 32rem;
+        background: var(--mc-surface-raised);
+        color: var(--mc-text-primary);
       }
       h2 {
         margin-top: 0;
+        font-family: var(--mc-font-display);
+        font-size: var(--mc-fs-heading-lg);
+        font-weight: 400;
+      }
+      p {
+        color: var(--mc-text-secondary);
       }
     `
   ]

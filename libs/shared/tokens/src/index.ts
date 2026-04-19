@@ -1,5 +1,17 @@
-/**
- * Design tokens land in SEV-7 (A2). This stub keeps the import path stable so
- * features can depend on `@shared/tokens` without churn once real tokens ship.
- */
-export const DESIGN_TOKENS_VERSION = '0.0.0-placeholder';
+export {
+  DESIGN_TOKENS_VERSION,
+  color,
+  cssVar,
+  densities,
+  elevation,
+  fontFamily,
+  fontSize,
+  lineHeight,
+  motion,
+  radius,
+  space,
+  themes,
+  tokens
+} from './lib/tokens';
+export type { Density, DesignTokens, Theme } from './lib/tokens';
+export { ThemeService } from './lib/theme.service';

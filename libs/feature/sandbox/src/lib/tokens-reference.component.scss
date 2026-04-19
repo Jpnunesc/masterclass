@@ -1,0 +1,58 @@
+:host { --_bd: 1px solid var(--mc-border-subtle); }
+.tokens-root { padding-block: var(--mc-pad-section); gap: var(--mc-space-12); }
+.lead { color: var(--mc-text-secondary); max-width: 40rem; }
+.section { display: flex; flex-direction: column; gap: var(--mc-space-5); }
+.type-grid { display: grid; gap: var(--mc-space-3); }
+.type-grid > div {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--mc-space-4); padding: var(--mc-space-4);
+  border: var(--_bd); border-radius: var(--mc-radius-md);
+  background: var(--mc-surface-raised);
+}
+code {
+  font-family: var(--mc-font-mono);
+  font-size: var(--mc-fs-caption);
+  color: var(--mc-text-secondary);
+}
+.ramp { display: flex; flex-direction: column; gap: var(--mc-space-2); }
+.ramp h3 { color: var(--mc-text-secondary); font-weight: 500; }
+.swatches, .surfaces {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--mc-space-3);
+}
+.swatch {
+  display: flex; align-items: center; gap: var(--mc-space-3);
+  padding: var(--mc-space-2); border: var(--_bd);
+  border-radius: var(--mc-radius-md); background: var(--mc-surface-raised);
+}
+.swatch code { flex: 1; }
+.chip {
+  width: 2rem; height: 2rem; flex-shrink: 0;
+  border: var(--_bd); border-radius: var(--mc-radius-sm);
+}
+.surface {
+  min-height: 5rem; border: var(--_bd); border-radius: var(--mc-radius-md);
+  display: flex; align-items: flex-end; padding: var(--mc-space-3);
+  box-shadow: var(--mc-elevation-1);
+}
+.surface code {
+  background: var(--mc-surface-raised);
+  padding: 0 var(--mc-space-2); border-radius: var(--mc-radius-xs);
+}
+.stack-spacing { display: flex; flex-direction: column; gap: var(--mc-space-2); }
+.space-row { display: flex; align-items: center; gap: var(--mc-space-3); }
+.space-bar {
+  display: inline-block; height: 0.5rem;
+  background: var(--mc-accent-500); border-radius: var(--mc-radius-pill);
+}
+.radius-grid, .elevation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--mc-space-4);
+}
+.radius-chip, .elevation-card {
+  height: 6rem; display: flex; align-items: flex-end; padding: var(--mc-space-3);
+}
+.radius-chip { background: var(--mc-surface-muted); border: var(--_bd); }
+.elevation-card { background: var(--mc-surface-raised); border-radius: var(--mc-radius-md); }

@@ -40,5 +40,10 @@ export const APP_ROUTES: Routes = [
     loadChildren: () =>
       import('@feature/profile').then((m) => m.PROFILE_ROUTES)
   },
+  {
+    path: 'sandbox',
+    loadChildren: () =>
+      import('@feature/sandbox').then((m) => m.SANDBOX_ROUTES)
+  },
   { path: '**', redirectTo: '' }
 ];

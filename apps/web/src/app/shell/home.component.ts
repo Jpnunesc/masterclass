@@ -7,27 +7,27 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="mc-home">
-      <h1>Welcome back</h1>
-      <p>Pick up where you left off, or start a new class with your AI tutor.</p>
-      <div class="mc-home-actions">
-        <a routerLink="/classroom">Start class</a>
-        <a routerLink="/materials">Browse materials</a>
+    <section class="mc-home mc-container mc-stack">
+      <p class="mc-caption">Your AI tutor</p>
+      <h1 class="mc-display-lg">Welcome back.</h1>
+      <p class="mc-body-lg mc-lead">
+        Pick up where you left off, or start a new class with your AI tutor.
+      </p>
+      <div class="mc-cluster">
+        <a routerLink="/classroom" class="mc-btn mc-btn-primary">Start class</a>
+        <a routerLink="/materials" class="mc-btn mc-btn-secondary">Browse materials</a>
       </div>
     </section>
   `,
   styles: [
     `
       .mc-home {
-        max-width: 48rem;
+        max-width: var(--mc-reading-max);
+        padding-block: var(--mc-pad-section);
       }
-      h1 {
-        margin-top: 0;
-      }
-      .mc-home-actions {
-        display: inline-flex;
-        gap: 1rem;
-        margin-top: 1rem;
+      .mc-lead {
+        color: var(--mc-text-secondary);
+        max-width: 36rem;
       }
     `
   ]

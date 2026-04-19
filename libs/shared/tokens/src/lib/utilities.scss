@@ -1,0 +1,152 @@
+/* =============================================================================
+ * Utility + base layer — all token-driven. Feature libs should compose these
+ * instead of hand-rolling hex/spacing.
+ * ============================================================================= */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--mc-surface-canvas);
+  color: var(--mc-text-primary);
+  font-family: var(--mc-font-body);
+  font-size: var(--mc-fs-body-md);
+  line-height: var(--mc-lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--mc-accent-100);
+  color: var(--mc-text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--mc-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--mc-radius-xs);
+}
+
+a {
+  color: var(--mc-text-link);
+  text-underline-offset: 0.15em;
+}
+
+/* ---------- Typography utilities ---------- */
+.mc-display {
+  font-family: var(--mc-font-display);
+  letter-spacing: var(--mc-tracking-tight);
+  line-height: var(--mc-lh-tight);
+  font-weight: 400;
+}
+.mc-display-xl { @extend .mc-display; font-size: var(--mc-fs-display-xl); }
+.mc-display-lg { @extend .mc-display; font-size: var(--mc-fs-display-lg); }
+.mc-display-md { @extend .mc-display; font-size: var(--mc-fs-display-md); }
+.mc-display-sm { @extend .mc-display; font-size: var(--mc-fs-display-sm); }
+
+.mc-heading {
+  font-family: var(--mc-font-body);
+  line-height: var(--mc-lh-snug);
+  font-weight: 600;
+  letter-spacing: var(--mc-tracking-tight);
+}
+.mc-heading-lg { @extend .mc-heading; font-size: var(--mc-fs-heading-lg); }
+.mc-heading-md { @extend .mc-heading; font-size: var(--mc-fs-heading-md); }
+.mc-heading-sm { @extend .mc-heading; font-size: var(--mc-fs-heading-sm); }
+
+.mc-body-lg { font-size: var(--mc-fs-body-lg); line-height: var(--mc-lh-body); }
+.mc-body-md { font-size: var(--mc-fs-body-md); line-height: var(--mc-lh-body); }
+.mc-body-sm { font-size: var(--mc-fs-body-sm); line-height: var(--mc-lh-body); }
+.mc-caption {
+  font-size: var(--mc-fs-caption);
+  line-height: var(--mc-lh-snug);
+  letter-spacing: var(--mc-tracking-wide);
+  text-transform: uppercase;
+  color: var(--mc-text-muted);
+}
+
+/* ---------- Surface utilities ---------- */
+.mc-surface-canvas { background: var(--mc-surface-canvas); color: var(--mc-text-primary); }
+.mc-surface-raised {
+  background: var(--mc-surface-raised);
+  color: var(--mc-text-primary);
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-lg);
+  box-shadow: var(--mc-elevation-1);
+}
+.mc-surface-muted { background: var(--mc-surface-muted); color: var(--mc-text-primary); }
+
+.mc-card {
+  background: var(--mc-surface-raised);
+  border: 1px solid var(--mc-border-subtle);
+  border-radius: var(--mc-radius-lg);
+  padding: var(--mc-pad-card);
+  box-shadow: var(--mc-elevation-1);
+}
+
+/* ---------- Layout helpers ---------- */
+.mc-stack { display: flex; flex-direction: column; gap: var(--mc-gap-stack); }
+.mc-inline { display: inline-flex; align-items: center; gap: var(--mc-gap-inline); }
+.mc-cluster { display: flex; flex-wrap: wrap; gap: var(--mc-gap-inline); }
+.mc-container {
+  width: 100%;
+  max-width: var(--mc-content-max);
+  margin-inline: auto;
+  padding-inline: var(--mc-space-6);
+}
+.mc-reading { max-width: var(--mc-reading-max); }
+
+/* ---------- Button ---------- */
+.mc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mc-gap-inline);
+  height: var(--mc-control-h);
+  padding: var(--mc-pad-control-y) var(--mc-pad-control-x);
+  border-radius: var(--mc-radius-pill);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--mc-duration-2) var(--mc-ease-standard),
+    color var(--mc-duration-2) var(--mc-ease-standard),
+    border-color var(--mc-duration-2) var(--mc-ease-standard),
+    box-shadow var(--mc-duration-2) var(--mc-ease-standard);
+}
+.mc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.mc-btn-primary {
+  background: var(--mc-accent-500);
+  color: var(--mc-accent-on);
+}
+.mc-btn-primary:hover:not(:disabled) { background: var(--mc-accent-600); }
+
+.mc-btn-secondary {
+  background: var(--mc-surface-raised);
+  color: var(--mc-text-primary);
+  border-color: var(--mc-border-strong);
+}
+.mc-btn-secondary:hover:not(:disabled) { border-color: var(--mc-border-accent); }
+
+.mc-btn-ghost {
+  background: transparent;
+  color: var(--mc-text-primary);
+}
+.mc-btn-ghost:hover:not(:disabled) { background: var(--mc-surface-muted); }
+
+/* ---------- Badge / chip ---------- */
+.mc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mc-space-1);
+  padding: var(--mc-space-1) var(--mc-space-3);
+  border-radius: var(--mc-radius-pill);
+  background: var(--mc-surface-muted);
+  color: var(--mc-text-secondary);
+  font-size: var(--mc-fs-caption);
+  letter-spacing: var(--mc-tracking-wide);
+  text-transform: uppercase;
+}

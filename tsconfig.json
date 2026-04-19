@@ -32,7 +32,8 @@
       "@feature/materials": ["libs/feature/materials/src/index.ts"],
       "@feature/review": ["libs/feature/review/src/index.ts"],
       "@feature/progress": ["libs/feature/progress/src/index.ts"],
-      "@feature/profile": ["libs/feature/profile/src/index.ts"]
+      "@feature/profile": ["libs/feature/profile/src/index.ts"],
+      "@feature/sandbox": ["libs/feature/sandbox/src/index.ts"]
     }
   },
   "angularCompilerOptions": {
