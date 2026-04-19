@@ -137,6 +137,13 @@ a {
 }
 .mc-btn-ghost:hover:not(:disabled) { background: var(--mc-surface-muted); }
 
+.mc-btn-destructive {
+  background: var(--mc-status-danger);
+  color: var(--mc-accent-on);
+}
+.mc-btn-destructive:hover:not(:disabled) { filter: brightness(0.92); }
+.mc-btn-destructive:focus-visible { outline-color: var(--mc-status-danger); }
+
 /* ---------- Badge / chip ---------- */
 .mc-badge {
   display: inline-flex;

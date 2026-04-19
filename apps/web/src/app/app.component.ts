@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 
 import { I18nService } from '@shared/i18n';
+import { ToastRegionComponent } from '@shared/ui';
 import { LearnerSessionService } from '@feature/auth';
 
 import {
@@ -30,7 +31,8 @@ import {
     DrawerTriggerComponent,
     AppDrawerComponent,
     AppFooterComponent,
-    ProductMarkComponent
+    ProductMarkComponent,
+    ToastRegionComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -73,6 +75,8 @@ import {
         (openProfile)="onOpenProfile()"
       />
     }
+
+    <mc-toast-region />
   `,
   styles: [
     `

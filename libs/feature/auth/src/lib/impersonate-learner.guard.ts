@@ -10,6 +10,7 @@ import {
 export interface LearnerIdentity {
   readonly userId: string;
   readonly displayName: string | null;
+  readonly email: string;
   readonly impersonated: boolean;
 }
 
@@ -22,6 +23,7 @@ export class LearnerSessionService {
   private readonly currentIdentity = signal<LearnerIdentity | null>({
     userId: 'dev-learner',
     displayName: null,
+    email: 'learner@masterclass.example',
     impersonated: true
   });
 

@@ -363,6 +363,7 @@ export class AuthComponent {
       this.session.setIdentity({
         userId: this.email().trim(),
         displayName: this.isSignup() ? this.name().trim() : null,
+        email: this.email().trim(),
         impersonated: false
       });
       await this.drain(started);
