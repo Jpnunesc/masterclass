@@ -36,8 +36,43 @@ jobs:
       - name: Check i18n (EN/PT parity + no hard-coded strings)
         run: npm run check:i18n
 
-      - name: Test
+      - name: Test (axe-core + keyboard-nav smoke + units)
         run: npm test
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
 
       - name: Build
         run: npm run build
+
+  lighthouse:
+    name: Lighthouse CI (a11y + perf budgets)
+    needs: web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run Lighthouse CI
+        run: npm run lhci
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+
+      - name: Upload Lighthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lhci-results
+          path: lhci-results
+          if-no-files-found: ignore

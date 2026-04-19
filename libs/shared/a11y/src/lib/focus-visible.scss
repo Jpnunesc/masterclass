@@ -1,0 +1,43 @@
+/* =============================================================================
+ * @shared/a11y — focus-visible + reduced-motion SCSS baselines.
+ * Feature libs compose these mixins on custom interactive elements so the
+ * whole product stays consistent with the global :focus-visible rule emitted
+ * by @shared/tokens utilities.scss.
+ * ============================================================================= */
+
+@mixin focus-ring($offset: 2px, $radius: var(--mc-radius-xs)) {
+  outline: 2px solid var(--mc-focus-ring);
+  outline-offset: $offset;
+  border-radius: $radius;
+}
+
+@mixin focus-visible($offset: 2px, $radius: var(--mc-radius-xs)) {
+  &:focus-visible {
+    @include focus-ring($offset, $radius);
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+@mixin motion-safe-transition($props: background, $duration: var(--mc-duration-2), $ease: var(--mc-ease-standard)) {
+  transition: $props $duration $ease;
+  @include reduced-motion {
+    transition: none;
+  }
+}
+
+.mc-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

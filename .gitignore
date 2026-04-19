@@ -24,6 +24,10 @@ pnpm-debug.log*
 coverage/
 *.lcov
 
+# Lighthouse CI (artifacts are uploaded per-run, not committed)
+lhci-results/
+.lighthouseci/
+
 # Environment
 .env
 .env.local

@@ -1,3 +1,4 @@
-/* Global styles — Claude Design tokens (SEV-7 / A2). */
+/* Global styles — Claude Design tokens (SEV-7 / A2) + a11y baseline (SEV-9 / A4). */
 @use '../../../libs/shared/tokens/src/lib/tokens.scss';
 @use '../../../libs/shared/tokens/src/lib/utilities.scss';
+@use '../../../libs/shared/a11y/src/lib/focus-visible.scss';

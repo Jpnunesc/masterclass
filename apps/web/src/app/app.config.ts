@@ -4,6 +4,7 @@ import { registerLocaleData } from '@angular/common';
 import localeEn from '@angular/common/locales/en';
 import localePt from '@angular/common/locales/pt';
 import { I18nService } from '@shared/i18n';
+import { provideLiveAnnouncer } from '@shared/a11y';
 
 import { APP_ROUTES } from './app.routes';
 
@@ -14,6 +15,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(APP_ROUTES, withComponentInputBinding()),
+    provideLiveAnnouncer(),
     {
       provide: LOCALE_ID,
       useFactory: () => inject(I18nService).locale()

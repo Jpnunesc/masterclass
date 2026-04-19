@@ -8,6 +8,7 @@
     "apps/web/src/**/*.spec.ts",
     "apps/web/src/**/*.d.ts",
     "libs/**/*.spec.ts",
-    "libs/**/*.d.ts"
+    "libs/**/*.d.ts",
+    "libs/**/testing/**/*.ts"
   ]
 }
