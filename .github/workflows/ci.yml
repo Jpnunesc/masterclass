@@ -30,6 +30,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Check design tokens (no raw hex in feature libs)
+        run: npm run check:no-hex
+
+      - name: Check i18n (EN/PT parity + no hard-coded strings)
+        run: npm run check:i18n
+
       - name: Test
         run: npm test
 

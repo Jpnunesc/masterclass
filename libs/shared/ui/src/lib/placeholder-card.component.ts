@@ -7,9 +7,11 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   template: `
     <article class="mc-placeholder" [attr.aria-label]="title">
       <h2>{{ title }}</h2>
-      <p>
-        <ng-content />
-      </p>
+      @if (body) {
+        <p>{{ body }}</p>
+      } @else {
+        <p><ng-content /></p>
+      }
     </article>
   `,
   styles: [
@@ -36,4 +38,5 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 })
 export class PlaceholderCardComponent {
   @Input({ required: true }) title!: string;
+  @Input() body?: string;
 }

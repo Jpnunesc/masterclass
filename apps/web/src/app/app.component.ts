@@ -1,31 +1,35 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { I18nService } from '@shared/i18n';
+import { LanguageSelectorComponent } from '@shared/ui';
 import { Density, ThemeService, densities } from '@shared/tokens';
 
 @Component({
   selector: 'mc-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, LanguageSelectorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a class="mc-skip-link" href="#mc-main">Skip to main content</a>
+    <a class="mc-skip-link" href="#mc-main">{{ i18n.t('app.skip_link') }}</a>
     <header class="mc-app-header" role="banner">
-      <a routerLink="/" class="mc-brand" aria-label="MasterClass AI English home">
-        <span class="mc-brand-lead">MasterClass</span>
-        <strong class="mc-brand-mark">AI English</strong>
+      <a routerLink="/" class="mc-brand" [attr.aria-label]="i18n.t('app.brand.aria')">
+        <span class="mc-brand-lead">{{ i18n.t('app.brand.lead') }}</span>
+        <strong class="mc-brand-mark">{{ i18n.t('app.brand.mark') }}</strong>
       </a>
-      <nav aria-label="Primary" class="mc-nav">
-        <a routerLink="/classroom">Classroom</a>
-        <a routerLink="/materials">Materials</a>
-        <a routerLink="/progress">Progress</a>
-        <a routerLink="/profile">Profile</a>
-        <a routerLink="/sandbox/tokens" class="mc-nav-secondary">Tokens</a>
+      <nav [attr.aria-label]="i18n.t('app.nav.aria')" class="mc-nav">
+        <a routerLink="/classroom">{{ i18n.t('app.nav.classroom') }}</a>
+        <a routerLink="/materials">{{ i18n.t('app.nav.materials') }}</a>
+        <a routerLink="/progress">{{ i18n.t('app.nav.progress') }}</a>
+        <a routerLink="/profile">{{ i18n.t('app.nav.profile') }}</a>
+        <a routerLink="/sandbox/tokens" class="mc-nav-secondary">{{ i18n.t('app.nav.tokens') }}</a>
       </nav>
       <div class="mc-app-controls mc-inline">
+        <mc-language-selector />
         <label class="mc-inline mc-body-sm">
-          <span class="mc-caption">Density</span>
+          <span class="mc-caption">{{ i18n.t('app.density.label') }}</span>
           <select
             class="mc-select"
+            [attr.aria-label]="i18n.t('app.density.aria')"
             [value]="theme.density()"
             (change)="onDensityChange($any($event.target).value)"
           >
@@ -39,9 +43,9 @@ import { Density, ThemeService, densities } from '@shared/tokens';
           class="mc-btn mc-btn-ghost"
           (click)="theme.toggleTheme()"
           [attr.aria-pressed]="theme.theme() === 'dark'"
-          aria-label="Toggle dark mode"
+          [attr.aria-label]="i18n.t('app.theme.toggle_aria')"
         >
-          {{ theme.theme() === 'dark' ? '☾ Dark' : '☀ Light' }}
+          {{ theme.theme() === 'dark' ? i18n.t('app.theme.dark') : i18n.t('app.theme.light') }}
         </button>
       </div>
     </header>
@@ -133,6 +137,7 @@ import { Density, ThemeService, densities } from '@shared/tokens';
 })
 export class AppComponent {
   protected readonly theme = inject(ThemeService);
+  protected readonly i18n = inject(I18nService);
   protected readonly densityOptions = densities;
 
   protected onDensityChange(value: string): void {

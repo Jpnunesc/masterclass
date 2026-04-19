@@ -1,9 +1,7 @@
-/**
- * Supported UI locales. Translation catalogs ship in SEV-8 (A3); this file owns
- * the shape so app bootstrap + language selector can rely on it now.
- */
-export type SupportedLocale = 'en' | 'pt-BR';
+export type SupportedLocale = 'en' | 'pt';
 
-export const SUPPORTED_LOCALES: readonly SupportedLocale[] = ['en', 'pt-BR'] as const;
+export const SUPPORTED_LOCALES: readonly SupportedLocale[] = ['en', 'pt'] as const;
 
 export const DEFAULT_LOCALE: SupportedLocale = 'en';
+
+export const LOCALE_STORAGE_KEY = 'mc.locale';

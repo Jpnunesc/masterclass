@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { I18nService } from '@shared/i18n';
 import { PlaceholderCardComponent } from '@shared/ui';
 
 @Component({
@@ -7,9 +8,12 @@ import { PlaceholderCardComponent } from '@shared/ui';
   imports: [PlaceholderCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <mc-placeholder-card title="Profile">
-      Account, preferences, and language selector land here. Lands in the B-children tickets of SEV-4.
-    </mc-placeholder-card>
+    <mc-placeholder-card
+      [title]="i18n.t('profile.title')"
+      [body]="i18n.t('profile.body')"
+    />
   `
 })
-export class ProfileComponent {}
+export class ProfileComponent {
+  protected readonly i18n = inject(I18nService);
+}
