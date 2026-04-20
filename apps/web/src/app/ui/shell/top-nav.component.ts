@@ -45,7 +45,7 @@ const TABS: readonly NavTab[] = [
         routerLink="/classroom"
         [attr.aria-label]="i18n.t('common.brand.home')"
       >
-        <mc-product-mark [ariaLabel]="i18n.t('common.brand.name')" />
+        <mc-product-mark aria-hidden="true" />
         <span class="mc-topnav__wordmark">{{ i18n.t('common.brand.name') }}</span>
       </a>
 
