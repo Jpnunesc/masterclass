@@ -2,3 +2,7 @@
 @use '../../../libs/shared/tokens/src/lib/tokens.scss';
 @use '../../../libs/shared/tokens/src/lib/utilities.scss';
 @use '../../../libs/shared/a11y/src/lib/focus-visible.scss';
+
+/* Lesson-review page styles — lifted out of the component (ViewEncapsulation.None)
+   so the per-component anyComponentStyle budget stays under 4 kB. See SEV-37. */
+@use '../../../libs/feature/materials/src/lib/lesson-review.component.scss';
