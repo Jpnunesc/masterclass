@@ -1,4 +1,5 @@
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,11 +14,18 @@ import { I18nService, type I18nKey } from '@shared/i18n';
 
 import { AudioControllerService } from './audio-controller.service';
 import type {
+  CorrectionItem,
   LessonReview,
   ReviewTab,
   TranscriptTurn
 } from './domain/lesson-review.types';
 import { REVIEW_TABS } from './domain/lesson-review.types';
+
+type TurnSegment =
+  | { kind: 'text'; text: string }
+  | { kind: 'correction'; text: string; correctionIndex: number };
+
+const PULSE_DURATION_MS = 1200;
 import { demoLessonReview } from './pipeline/demo-lesson-review';
 import { AudioButtonComponent } from './ui/audio-button.component';
 
@@ -206,7 +214,11 @@ import { AudioButtonComponent } from './ui/audio-button.component';
             @if (review().corrections.length > 0) {
               <div class="mc-review__corr-list">
                 @for (c of review().corrections; track c.studentLine; let i = $index) {
-                  <article class="mc-review__corr-card">
+                  <article
+                    class="mc-review__corr-card"
+                    [id]="'mc-correction-card-' + i"
+                    [class.is-pulsing]="pulsingCorrection() === i"
+                  >
                     <p class="mc-review__corr-eyebrow">{{ i18n.t('review.corrections.eyebrow') }}</p>
                     <p class="mc-review__corr-student">{{ quoteStudent(c.studentLine) }}</p>
                     <p class="mc-review__corr-corrected">{{ c.correctedLine }}</p>
@@ -242,7 +254,39 @@ import { AudioButtonComponent } from './ui/audio-button.component';
                       <span class="mc-review__turn-speaker">{{ speakerLabel(turn.speaker) }}</span>
                       <span class="mc-review__turn-ts">{{ formatTs(turn.seconds) }}</span>
                     </p>
-                    <p class="mc-review__turn-text">{{ turn.text }}</p>
+                    <p class="mc-review__turn-text">
+                      @for (seg of turnSegments(turn); track $index) {
+                        @if (seg.kind === 'text') {
+                          <span>{{ seg.text }}</span>
+                        } @else {
+                          <span class="mc-review__corr-anchor">
+                            <button
+                              type="button"
+                              class="mc-transcript-correction"
+                              [id]="correctionAnchorId(turn.id, $index)"
+                              [attr.aria-expanded]="openPopover() === correctionAnchorId(turn.id, $index)"
+                              [attr.aria-haspopup]="'dialog'"
+                              (click)="togglePopover(turn.id, $index, seg.correctionIndex)"
+                            >{{ seg.text }}</button>
+                            @if (openPopover() === correctionAnchorId(turn.id, $index)) {
+                              <span
+                                class="mc-transcript-popover"
+                                role="dialog"
+                                [attr.aria-label]="i18n.t('review.corrections.eyebrow')"
+                              >
+                                <span class="mc-transcript-popover__corrected">{{ correctionFor(seg.correctionIndex)?.correctedLine }}</span>
+                                <span class="mc-transcript-popover__note">{{ noteBody(correctionFor(seg.correctionIndex)?.teacherNote ?? '') }}</span>
+                                <button
+                                  type="button"
+                                  class="mc-transcript-popover__link"
+                                  (click)="jumpToCorrection(seg.correctionIndex); $event.stopPropagation()"
+                                >{{ i18n.t('review.transcript.seeCorrection') }}</button>
+                              </span>
+                            }
+                          </span>
+                        }
+                      }
+                    </p>
                   </div>
                 </li>
               }
@@ -669,6 +713,72 @@ import { AudioButtonComponent } from './ui/audio-button.component';
         margin: 0;
         overflow-wrap: anywhere;
       }
+      .mc-review__corr-anchor {
+        position: relative;
+        display: inline;
+      }
+      .mc-transcript-correction {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-color: var(--mc-status-danger);
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 3px;
+      }
+      .mc-transcript-correction:focus-visible {
+        outline: 2px solid var(--mc-accent);
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+      .mc-transcript-popover {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        z-index: 3;
+        display: grid;
+        gap: var(--mc-space-2);
+        width: 280px;
+        padding: var(--mc-space-3) var(--mc-space-4);
+        background: var(--mc-bg-raised);
+        border: 1px solid var(--mc-line);
+        border-radius: var(--mc-radius-md);
+        box-shadow: var(--mc-elev-2);
+        text-align: start;
+      }
+      .mc-transcript-popover__corrected {
+        font: var(--mc-fs-body-md) / 1.3 var(--mc-font-body);
+        color: var(--mc-ink);
+      }
+      .mc-transcript-popover__note {
+        font: var(--mc-fs-body-sm) / 1.3 var(--mc-font-body);
+        color: var(--mc-ink-muted);
+      }
+      .mc-transcript-popover__link {
+        justify-self: start;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: var(--mc-accent-600, var(--mc-accent));
+        cursor: pointer;
+        font: var(--mc-fs-caption) / 1 var(--mc-font-body);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .mc-review__corr-card.is-pulsing {
+        animation: mc-corr-pulse 1.2s ease-out 1;
+      }
+      @keyframes mc-corr-pulse {
+        0% { background-color: var(--mc-bg-raised); }
+        20% { background-color: var(--mc-accent-soft); }
+        100% { background-color: var(--mc-bg-raised); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .mc-review__corr-card.is-pulsing { animation: none; background-color: var(--mc-accent-soft); }
+      }
 
       .mc-review__empty {
         margin: 0;
@@ -709,6 +819,7 @@ export class LessonReviewComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly audio = inject(AudioControllerService);
+  private readonly doc = inject(DOCUMENT);
 
   @HostListener('window:keydown.escape')
   protected onEscape(): void {
@@ -795,6 +906,80 @@ export class LessonReviewComponent {
 
   protected noteBody(note: string): string {
     return `\u2014 ${note}`;
+  }
+
+  private readonly openPopoverSignal = signal<string | null>(null);
+  private readonly pulsingCorrectionSignal = signal<number | null>(null);
+  private pulseTimer: ReturnType<typeof setTimeout> | null = null;
+
+  protected readonly openPopover = this.openPopoverSignal.asReadonly();
+  protected readonly pulsingCorrection = this.pulsingCorrectionSignal.asReadonly();
+
+  protected correctionAnchorId(turnId: string, segIndex: number): string {
+    return `${turnId}:${segIndex}`;
+  }
+
+  protected turnSegments(turn: TranscriptTurn): readonly TurnSegment[] {
+    const spans = turn.corrections;
+    if (!spans || spans.length === 0) return [{ kind: 'text', text: turn.text }];
+    const segments: TurnSegment[] = [];
+    let cursor = 0;
+    const working = turn.text;
+    // Ordered scan: find each span in text order; skip spans not found.
+    const ordered = [...spans]
+      .map((s) => ({ ...s, pos: working.indexOf(s.fragment, cursor) }))
+      .filter((s) => s.pos >= 0)
+      .sort((a, b) => a.pos - b.pos);
+    for (const span of ordered) {
+      if (span.pos > cursor) {
+        segments.push({ kind: 'text', text: working.slice(cursor, span.pos) });
+      }
+      segments.push({
+        kind: 'correction',
+        text: span.fragment,
+        correctionIndex: span.correctionIndex
+      });
+      cursor = span.pos + span.fragment.length;
+    }
+    if (cursor < working.length) {
+      segments.push({ kind: 'text', text: working.slice(cursor) });
+    }
+    return segments;
+  }
+
+  protected correctionFor(index: number): CorrectionItem | null {
+    return this.review().corrections[index] ?? null;
+  }
+
+  protected togglePopover(turnId: string, segIndex: number, _correctionIndex: number): void {
+    const id = this.correctionAnchorId(turnId, segIndex);
+    this.openPopoverSignal.update((v) => (v === id ? null : id));
+  }
+
+  protected jumpToCorrection(index: number): void {
+    this.openPopoverSignal.set(null);
+    this.setActive('corrections');
+    this.pulsingCorrectionSignal.set(index);
+    if (this.pulseTimer) clearTimeout(this.pulseTimer);
+    this.pulseTimer = setTimeout(() => {
+      this.pulsingCorrectionSignal.set(null);
+      this.pulseTimer = null;
+    }, PULSE_DURATION_MS);
+    // Scroll the matching card into view on the next frame once the panel
+    // has rendered. Uses the DOM directly since the cards render via @for.
+    queueMicrotask(() => {
+      const el = this.doc.getElementById(`mc-correction-card-${index}`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(ev: Event): void {
+    if (this.openPopoverSignal() === null) return;
+    const target = ev.target as HTMLElement | null;
+    if (!target) return;
+    if (target.closest('.mc-transcript-correction, .mc-transcript-popover')) return;
+    this.openPopoverSignal.set(null);
   }
 
   protected tabCount(tab: ReviewTab): number {

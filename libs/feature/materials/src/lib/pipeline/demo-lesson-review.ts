@@ -130,7 +130,8 @@ export function demoLessonReview(
         id: 't-2',
         speaker: 'student',
         seconds: 9,
-        text: 'Yes. I want to order a coffee.'
+        text: 'Yes. I want to order a coffee.',
+        corrections: [{ fragment: 'I want', correctionIndex: 1 }]
       },
       {
         id: 't-3',
@@ -154,7 +155,8 @@ export function demoLessonReview(
         id: 't-6',
         speaker: 'student',
         seconds: 32,
-        text: 'Can I have cappuccino?'
+        text: 'Can I have cappuccino?',
+        corrections: [{ fragment: 'Can I have cappuccino', correctionIndex: 0 }]
       },
       {
         id: 't-7',

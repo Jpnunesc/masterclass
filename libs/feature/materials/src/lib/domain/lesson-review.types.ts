@@ -20,11 +20,22 @@ export interface CorrectionItem {
 
 export type TranscriptSpeaker = 'teacher' | 'student';
 
+/**
+ * Marks a contiguous fragment inside `TranscriptTurn.text` that the teacher
+ * later corrected. `correctionIndex` indexes into `LessonReview.corrections`
+ * so the transcript popover can jump to the matching card.
+ */
+export interface TranscriptCorrectionSpan {
+  readonly fragment: string;
+  readonly correctionIndex: number;
+}
+
 export interface TranscriptTurn {
   readonly id: string;
   readonly speaker: TranscriptSpeaker;
   readonly seconds: number;
   readonly text: string;           // verbatim (not localized)
+  readonly corrections?: readonly TranscriptCorrectionSpan[];
 }
 
 export interface LessonReview {
