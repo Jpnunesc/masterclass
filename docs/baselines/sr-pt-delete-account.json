@@ -1,0 +1,28 @@
+{
+  "$schema": "./sr-pt.schema.json",
+  "flow": "delete-account",
+  "auditSection": "5.5",
+  "issue": "SEV-38",
+  "spec": "libs/feature/profile/src/lib/delete-account-modal.sr.pt.spec.ts",
+  "harness": "@guidepup/virtual-screen-reader",
+  "locale": "pt-BR",
+  "documentLang": "pt-BR",
+  "description": "Screen-reader smoke run over the profile delete-account modal. Mounts <mc-delete-account-modal> with an impersonated learner (aluno@exemplo.com.br), asserts the modal is a properly labelled dialog (role=dialog, aria-modal=true, aria-labelledby=mc-delete-modal-title), initial focus lands on the typed-confirm input, the destructive CTA starts disabled, and the full destructive confirmation — title, body paragraphs, typed-confirm field label + help, cancel, and destructive button — is narrated in PT-BR.",
+  "dialog": {
+    "role": "dialog",
+    "ariaModal": true,
+    "ariaLabelledby": "mc-delete-modal-title",
+    "initialFocus": "#mc-delete-confirm"
+  },
+  "requiredPhrases": [
+    "Excluir sua conta?",
+    "Isso removerá permanentemente suas aulas, progresso e preferências.",
+    "Você sairá logo em seguida. Sempre pode criar conta novamente com o mesmo e-mail mais tarde.",
+    "Digite seu e-mail para confirmar",
+    "Deve corresponder exatamente a aluno@exemplo.com.br.",
+    "Cancelar",
+    "Excluir minha conta"
+  ],
+  "lastRunAt": "2026-04-20",
+  "lastRunStatus": "pass"
+}

@@ -24,6 +24,19 @@ must not bust these without a deliberate budget update.
   - `libs/feature/classroom/src/lib/reduced-motion.spec.ts` — SEV-31 regression
     guard that avatar halo/mouth/thinking-dots/idle-breathe and mic halo/amp
     animations are silenced under `prefers-reduced-motion: reduce`.
+  - `libs/feature/classroom/src/lib/classroom.sr.pt.spec.ts` — SEV-38 §5.4
+    PT-BR screen-reader smoke over classroom mic → chat → whiteboard
+    transitions. Uses `@guidepup/virtual-screen-reader` against the live
+    `mc-classroom` tree at `lg` layout and asserts the required PT phrases
+    (avatar, mic caption, board eyebrows, transcript) appear in order.
+    Baseline: `docs/baselines/sr-pt-classroom.json`.
+  - `libs/feature/profile/src/lib/delete-account-modal.sr.pt.spec.ts` — SEV-38
+    §5.5 PT-BR screen-reader smoke over the delete-account modal.
+    Asserts `role=dialog`, `aria-modal=true`, `aria-labelledby` on the
+    modal, initial focus on the typed-confirm input, and that the full
+    destructive confirmation (title, body, typed-confirm label + help,
+    Cancelar, Excluir minha conta) is narrated in PT-BR. Baseline:
+    `docs/baselines/sr-pt-delete-account.json`.
   - `libs/shared/a11y/**/*.spec.ts` — live-announcer + reduced-motion unit specs.
 - `npm run check:no-hex` — no raw hex in feature libs (SEV-7).
 - `npm run check:i18n` — EN/PT parity + no hard-coded strings (SEV-8).

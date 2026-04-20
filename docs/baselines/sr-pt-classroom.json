@@ -1,0 +1,37 @@
+{
+  "$schema": "./sr-pt.schema.json",
+  "flow": "classroom",
+  "auditSection": "5.4",
+  "issue": "SEV-38",
+  "spec": "libs/feature/classroom/src/lib/classroom.sr.pt.spec.ts",
+  "harness": "@guidepup/virtual-screen-reader",
+  "locale": "pt-BR",
+  "documentLang": "pt-BR",
+  "layoutMode": "lg",
+  "description": "Screen-reader smoke run over the classroom mic → chat → whiteboard transitions. Mounts <mc-classroom> at lg layout (avatar | whiteboard | transcript), steps the virtual screen reader through the three regions in PT-BR, toggles the mic (idle → armed), posts a student turn, submits the exercise, and asserts the required PT phrases appear in order.",
+  "requiredPhrases": [
+    "Professor",
+    "Microfone desligado. Pressione para falar.",
+    "Quadro branco",
+    "Vocabulário",
+    "Gramática",
+    "Exercício",
+    "Transcrição",
+    "Aula iniciada",
+    "Bem-vindo de volta. Vamos aquecer com frases sobre ontem.",
+    "Microfone pronto",
+    "Você disse Eu fui ao parque ontem."
+  ],
+  "liveAnnouncerPoliteAcceptable": [
+    "Professor presente",
+    "Ouvindo",
+    "Pensando",
+    "Falando",
+    "Sua vez",
+    "Ótimo",
+    "Vamos corrigir isto",
+    "Professor descansando"
+  ],
+  "lastRunAt": "2026-04-20",
+  "lastRunStatus": "pass"
+}
