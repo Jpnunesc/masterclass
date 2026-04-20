@@ -33,6 +33,9 @@ const NEAR_BOTTOM_PX = 120;
     >
       <header class="mc-board__header">
         <h1 class="mc-board__title">{{ i18n.t(lessonTitleKey()) }}</h1>
+        <div class="mc-board__header-trailing">
+          <ng-content select="[slot='board-trailing']" />
+        </div>
       </header>
 
       <ol class="mc-board__cards" role="list" #stream (scroll)="onScroll()">
@@ -81,11 +84,20 @@ const NEAR_BOTTOM_PX = 120;
         display: flex;
         align-items: baseline;
         justify-content: space-between;
+        gap: var(--mc-space-3);
         padding-inline: var(--mc-space-2);
+      }
+      .mc-board__header-trailing {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--mc-space-2);
+      }
+      .mc-board__header-trailing:empty {
+        display: none;
       }
       .mc-board__title {
         margin: 0;
-        font: var(--mc-type-display-sm);
+        font: var(--mc-type-display-md);
         letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
       }

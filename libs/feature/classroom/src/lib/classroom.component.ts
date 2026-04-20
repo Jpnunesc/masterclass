@@ -5,6 +5,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   signal
 } from '@angular/core';
@@ -89,7 +90,31 @@ import { WhiteboardColumnComponent } from './whiteboard-column.component';
           [lessonTitleKey]="session.lesson().titleKey"
           [objectiveKey]="session.lesson().objectiveKey"
           (submitExercise)="onSubmitExercise($event)"
-        />
+        >
+          @if (layoutMode() === 'md') {
+            <button
+              slot="board-trailing"
+              type="button"
+              class="mc-classroom__drawer-trigger"
+              [attr.aria-label]="i18n.t('classroom.drawer.open')"
+              [attr.aria-expanded]="drawerOpen()"
+              aria-controls="mc-classroom-drawer"
+              (click)="toggleDrawer()"
+            >
+              <span>{{ i18n.t('classroom.drawer.open') }}</span>
+              @if (unreadSystemCount() > 0) {
+                <span
+                  class="mc-classroom__drawer-badge"
+                  [attr.aria-label]="
+                    i18n.t('classroom.drawer.unread', { count: unreadSystemCount() })
+                  "
+                >
+                  {{ unreadSystemCount() }}
+                </span>
+              }
+            </button>
+          }
+        </mc-whiteboard-column>
       </section>
 
       <section
@@ -104,6 +129,29 @@ import { WhiteboardColumnComponent } from './whiteboard-column.component';
           (submitMessage)="onChatSubmit($event)"
         />
       </section>
+
+      @if (layoutMode() === 'md' && drawerOpen()) {
+        <div
+          class="mc-classroom__drawer-backdrop"
+          aria-hidden="true"
+          (click)="closeDrawer()"
+        ></div>
+        <aside
+          id="mc-classroom-drawer"
+          class="mc-classroom__drawer"
+          role="dialog"
+          aria-modal="false"
+          [attr.aria-label]="i18n.t('classroom.aria.transcript')"
+        >
+          <mc-chat-column
+            [turns]="session.turns()"
+            [inputOpen]="chatInputOpen()"
+            (openInputClick)="chatInputOpen.set(true)"
+            (closeInputClick)="chatInputOpen.set(false)"
+            (submitMessage)="onChatSubmit($event)"
+          />
+        </aside>
+      }
 
       <a
         routerLink="/classroom/states-gallery"
@@ -181,15 +229,91 @@ import { WhiteboardColumnComponent } from './whiteboard-column.component';
         outline: 2px solid var(--mc-accent);
         outline-offset: 2px;
       }
+      .mc-classroom__drawer-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--mc-space-2);
+        padding: var(--mc-space-1) var(--mc-space-3);
+        background: var(--mc-bg-raised);
+        color: var(--mc-ink);
+        border: 1px solid var(--mc-line-strong);
+        border-radius: var(--mc-radius-pill);
+        font-family: var(--mc-font-body);
+        font-size: var(--mc-fs-caption);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .mc-classroom__drawer-trigger:focus-visible {
+        outline: 2px solid var(--mc-accent);
+        outline-offset: 2px;
+      }
+      .mc-classroom__drawer-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 var(--mc-space-1);
+        border-radius: var(--mc-radius-pill);
+        background: var(--mc-accent);
+        color: var(--mc-accent-ink);
+        font-size: var(--mc-fs-caption);
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: none;
+      }
+      .mc-classroom__drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        background: color-mix(in srgb, var(--mc-ink) 32%, transparent);
+        z-index: 40;
+        animation: mc-classroom-fade var(--mc-dur-2) var(--mc-ease-enter);
+      }
+      .mc-classroom__drawer {
+        position: fixed;
+        inset-block: 0;
+        inset-inline-end: 0;
+        width: 360px;
+        max-width: 100vw;
+        background: var(--mc-bg);
+        border-inline-start: 1px solid var(--mc-line);
+        box-shadow: var(--mc-elev-2);
+        z-index: 41;
+        display: flex;
+        flex-direction: column;
+        animation: mc-classroom-slide-in var(--mc-dur-3) var(--mc-ease-enter);
+      }
+      @keyframes mc-classroom-fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes mc-classroom-slide-in {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .mc-classroom__drawer,
+        .mc-classroom__drawer-backdrop {
+          animation: none;
+        }
+      }
       @media (max-width: 1024px) {
         .mc-classroom {
           grid-template-columns: 240px 1fr;
+        }
+        .mc-classroom__chat {
+          display: none;
         }
       }
       @media (max-width: 48rem) {
         .mc-classroom {
           grid-template-columns: 1fr;
           padding: var(--mc-space-4);
+        }
+        .mc-classroom__chat {
+          display: block;
         }
         .mc-classroom__tabs {
           display: flex;
@@ -208,6 +332,8 @@ export class ClassroomComponent implements OnInit, OnDestroy {
 
   protected readonly chatInputOpen = signal(false);
   protected readonly mobileView = signal<'whiteboard' | 'transcript'>('whiteboard');
+  protected readonly drawerOpen = signal(false);
+  private readonly lastSeenSystemCount = signal(0);
 
   private readonly viewportWidth = signal<number>(
     typeof window !== 'undefined' ? window.innerWidth : 1280
@@ -218,6 +344,21 @@ export class ClassroomComponent implements OnInit, OnDestroy {
     if (w >= 768) return 'md';
     return 'sm';
   });
+
+  private readonly systemTurnCount = computed(
+    () => this.session.turns().filter((t) => t.role === 'system').length
+  );
+  protected readonly unreadSystemCount = computed(() =>
+    Math.max(0, this.systemTurnCount() - this.lastSeenSystemCount())
+  );
+
+  constructor() {
+    effect(() => {
+      if (this.drawerOpen()) {
+        this.lastSeenSystemCount.set(this.systemTurnCount());
+      }
+    });
+  }
 
   @HostListener('window:resize')
   protected onResize(): void {
@@ -247,6 +388,14 @@ export class ClassroomComponent implements OnInit, OnDestroy {
     this.chatInputOpen.set(false);
   }
 
+  toggleDrawer(): void {
+    this.drawerOpen.update((v) => !v);
+  }
+
+  closeDrawer(): void {
+    this.drawerOpen.set(false);
+  }
+
   @HostListener('document:keydown', ['$event'])
   protected onDocumentKey(event: KeyboardEvent): void {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
@@ -260,6 +409,11 @@ export class ClassroomComponent implements OnInit, OnDestroy {
     if (key === 'escape') {
       if (this.chatInputOpen()) {
         this.chatInputOpen.set(false);
+        event.preventDefault();
+        return;
+      }
+      if (this.drawerOpen()) {
+        this.drawerOpen.set(false);
         event.preventDefault();
         return;
       }

@@ -126,6 +126,8 @@
   "classroom.breadcrumb": "Classroom · {lesson}",
   "classroom.end": "End lesson",
   "classroom.drawer.open": "Transcript",
+  "classroom.drawer.close": "Close transcript",
+  "classroom.drawer.unread": "{count, plural, one {# new update} other {# new updates}}",
   "classroom.hint.mic": "Press M to talk",
   "classroom.hint.chat": "Press / to type",
   "classroom.board.new_note": "New note ↓",

@@ -1,16 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  afterNextRender,
   computed,
   inject,
   input,
   output,
-  signal
+  signal,
+  viewChild
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { I18nService, type I18nKey } from '@shared/i18n';
 
+import { ClassroomSessionService } from './classroom-session.service';
 import type { BoardCard, ExerciseCard, ExerciseCardState } from './classroom.types';
 
 interface ExerciseSubmitEvent {
@@ -55,6 +59,7 @@ interface ExerciseSubmitEvent {
             </label>
             @if (asExercise().multiline) {
               <textarea
+                #exerciseInput
                 [id]="inputId()"
                 class="mc-input mc-input--underline"
                 rows="2"
@@ -65,6 +70,7 @@ interface ExerciseSubmitEvent {
               ></textarea>
             } @else {
               <input
+                #exerciseInput
                 type="text"
                 [id]="inputId()"
                 class="mc-input mc-input--underline"
@@ -293,11 +299,28 @@ interface ExerciseSubmitEvent {
 })
 export class WhiteboardCardComponent {
   protected readonly i18n = inject(I18nService);
+  private readonly session = inject(ClassroomSessionService);
 
   readonly card = input.required<BoardCard>();
   readonly submitExercise = output<ExerciseSubmitEvent>();
 
   protected draft = signal('');
+  protected readonly exerciseInputRef =
+    viewChild<ElementRef<HTMLInputElement | HTMLTextAreaElement>>('exerciseInput');
+
+  constructor() {
+    afterNextRender(() => this.maybeAutoFocus());
+  }
+
+  /** Spec §6.2 #2 — auto-focus only if mic is idle and no TTS is in flight. */
+  private maybeAutoFocus(): void {
+    const c = this.card();
+    if (c.variant !== 'exercise') return;
+    if (c.state !== 'idle' && c.state !== 'ready') return;
+    if (this.session.micState() !== 'idle') return;
+    if (this.session.avatarState() === 'speaking') return;
+    this.exerciseInputRef()?.nativeElement.focus();
+  }
 
   readonly inputId = computed(() => `mc-exercise-${this.card().id}`);
 

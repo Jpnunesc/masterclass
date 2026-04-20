@@ -123,6 +123,7 @@ import type { MicState } from './classroom.types';
         background: var(--mc-accent);
         color: var(--mc-accent-ink);
       }
+      /* TODO(SEV-18 §2.3): replace canned keyframe with AnalyserNode-driven stroke-width tween (2px→8px on live RMS). Breathing halo below stays. */
       [data-state='recording'] .mc-mic__amp {
         border: 2px solid rgba(204, 120, 92, 0.6);
         animation: mc-mic-amp 900ms var(--mc-ease-standard) infinite;

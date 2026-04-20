@@ -126,6 +126,8 @@
   "classroom.breadcrumb": "Sala de aula · {lesson}",
   "classroom.end": "Encerrar aula",
   "classroom.drawer.open": "Transcrição",
+  "classroom.drawer.close": "Fechar transcrição",
+  "classroom.drawer.unread": "{count, plural, one {# nova atualização} other {# novas atualizações}}",
   "classroom.hint.mic": "Pressione M para falar",
   "classroom.hint.chat": "Pressione / para digitar",
   "classroom.board.new_note": "Nova nota ↓",

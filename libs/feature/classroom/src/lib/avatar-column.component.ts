@@ -24,7 +24,10 @@ import type { AvatarState, MicState } from './classroom.types';
         {{ captionText() }}
       </p>
 
-      <div class="mc-avatar-col__meta">
+      <div
+        class="mc-avatar-col__meta"
+        [class.mc-avatar-col__meta--dim]="isComputing()"
+      >
         <span class="mc-avatar-col__teacher">{{ i18n.t(teacherNameKey()) }}</span>
         <span class="mc-avatar-col__sep" aria-hidden="true">·</span>
         <span class="mc-avatar-col__lesson">{{ i18n.t(lessonTitleKey()) }}</span>
@@ -74,6 +77,13 @@ import type { AvatarState, MicState } from './classroom.types';
         font-size: var(--mc-fs-body-sm);
         color: var(--mc-ink-muted);
         max-width: 100%;
+        transition: color var(--mc-dur-2) var(--mc-ease-standard);
+      }
+      .mc-avatar-col__meta--dim {
+        color: var(--mc-ink-faint);
+      }
+      .mc-avatar-col__meta--dim .mc-avatar-col__sep {
+        color: var(--mc-ink-faint);
       }
       .mc-avatar-col__teacher {
         white-space: nowrap;
@@ -130,6 +140,10 @@ export class AvatarColumnComponent {
     const key = `classroom.avatar.caption.${this.avatarState()}` as I18nKey;
     return this.i18n.t(key);
   });
+
+  readonly isComputing = computed(
+    () => this.avatarState() === 'thinking' || this.micState() === 'processing'
+  );
 
   readonly sessionMetaText = computed(() =>
     this.i18n.t('classroom.session_meta', {
