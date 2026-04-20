@@ -280,14 +280,17 @@ export class ChatColumnComponent implements AfterViewInit, OnDestroy {
   readonly showJumpPill = computed(() => !this.nearBottom() && this.pendingUnseen());
 
   constructor() {
-    effect(() => {
-      const count = this.turns().length;
-      const prev = this.lastCount();
-      if (count > prev) {
-        queueMicrotask(() => this.handleTurnAdded());
-      }
-      this.lastCount.set(count);
-    });
+    effect(
+      () => {
+        const count = this.turns().length;
+        const prev = this.lastCount();
+        if (count > prev) {
+          queueMicrotask(() => this.handleTurnAdded());
+        }
+        this.lastCount.set(count);
+      },
+      { allowSignalWrites: true }
+    );
     effect(() => {
       if (this.inputOpen()) {
         queueMicrotask(() => this.inputRef()?.nativeElement.focus());

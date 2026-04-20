@@ -42,6 +42,9 @@ async function walk(dir) {
     }
     if (!entry.isFile()) continue;
     if (!FILE_EXTS.has(path.extname(entry.name))) continue;
+    // Spec files may reference raw hex values intentionally (e.g. token
+    // contrast regression specs) — keep parity with check-i18n and skip them.
+    if (entry.name.endsWith('.spec.ts') || entry.name.endsWith('.test.ts')) continue;
     await scan(full);
   }
 }

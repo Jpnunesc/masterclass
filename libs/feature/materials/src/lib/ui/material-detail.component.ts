@@ -31,7 +31,7 @@ import type { Material } from '../domain/material.types';
         <button
           type="button"
           class="mc-btn mc-btn-secondary mc-material-detail-close"
-          (click)="close.emit()"
+          (click)="closed.emit()"
         >
           {{ closeLabel }}
         </button>
@@ -207,5 +207,5 @@ export class MaterialDetailComponent {
   @Input({ required: true }) kindLabel!: string;
   @Input({ required: true }) closeLabel!: string;
 
-  @Output() close = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
 }

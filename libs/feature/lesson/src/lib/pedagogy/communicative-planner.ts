@@ -9,7 +9,7 @@ import type {
   LessonPlan
 } from '../domain/lesson.types';
 
-import { CURRICULUM_SEED, entriesForLevel, type CurriculumEntry } from './curriculum-seed';
+import { CURRICULUM_SEED, type CurriculumEntry } from './curriculum-seed';
 
 /**
  * Communicative Approach plan generator.
@@ -156,8 +156,32 @@ function buildSkillSequence(
 
   boostSkill(seq, weakest, 2);
   boostSkill(seq, strongest, 1);
+  guaranteeAllSkills(seq);
 
   return seq;
+}
+
+/**
+ * Ensures every four-skills target appears at least once in the sequence.
+ * Replaces duplicate slots (skills that already appear more than once) with
+ * any missing skill, preferring the last duplicate to preserve earlier
+ * weakest/strongest boosts.
+ */
+function guaranteeAllSkills(seq: AssessmentSkill[]): void {
+  const skills: readonly AssessmentSkill[] = ['listen', 'speak', 'read', 'write'];
+  for (const skill of skills) {
+    if (seq.includes(skill)) continue;
+    const counts: Record<AssessmentSkill, number> = { listen: 0, speak: 0, read: 0, write: 0 };
+    for (const s of seq) counts[s]++;
+    let victimIndex = -1;
+    for (let i = seq.length - 1; i >= 0; i--) {
+      if (counts[seq[i]] > 1) {
+        victimIndex = i;
+        break;
+      }
+    }
+    if (victimIndex !== -1) seq[victimIndex] = skill;
+  }
 }
 
 function rotateRotation(

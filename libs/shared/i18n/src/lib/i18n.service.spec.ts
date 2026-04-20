@@ -35,7 +35,9 @@ function createFakeDocument(opts: {
     defaultView: {
       navigator: { language: opts.navigatorLanguage ?? 'en-US' },
       localStorage: storage
-    }
+    },
+    querySelectorAll: () => [] as unknown as NodeListOf<Element>,
+    getElementById: () => null
   };
   return { doc, root, store };
 }

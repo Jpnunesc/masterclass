@@ -17,7 +17,9 @@ function fakeDoc(initialDensity?: string) {
   } as unknown as Storage;
   return {
     documentElement: { setAttribute() {}, getAttribute() { return null; } },
-    defaultView: { localStorage: storage }
+    defaultView: { localStorage: storage },
+    querySelectorAll: () => [] as unknown as NodeListOf<Element>,
+    getElementById: () => null
   };
 }
 

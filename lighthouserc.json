@@ -5,8 +5,17 @@
       "isSinglePageApplication": true,
       "url": [
         "http://localhost/index.html",
-        "http://localhost/sandbox/tokens",
-        "http://localhost/classroom"
+        "http://localhost/auth",
+        "http://localhost/onboarding",
+        "http://localhost/assessment",
+        "http://localhost/classroom",
+        "http://localhost/lesson",
+        "http://localhost/materials",
+        "http://localhost/review",
+        "http://localhost/progress",
+        "http://localhost/history",
+        "http://localhost/profile",
+        "http://localhost/sandbox/tokens"
       ],
       "numberOfRuns": 3,
       "settings": {

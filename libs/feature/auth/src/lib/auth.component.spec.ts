@@ -58,41 +58,47 @@ describe('AuthComponent', () => {
 
   it('surfaces inline email-format error on submit', async () => {
     const fixture = mount();
+    await fixture.whenStable();
+    fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const email = el.querySelector<HTMLInputElement>('input[name="email"]')!;
     const password = el.querySelector<HTMLInputElement>('input[name="password"]')!;
     email.value = 'not-an-email';
-    email.dispatchEvent(new Event('input'));
+    email.dispatchEvent(new Event('input', { bubbles: true }));
     password.value = 'hunter22';
-    password.dispatchEvent(new Event('input'));
+    password.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
     const form = el.querySelector<HTMLFormElement>('form')!;
-    form.dispatchEvent(new Event('submit'));
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     fixture.detectChanges();
     expect(el.textContent).toContain("That email doesn't look right.");
   });
 
   it('routes to /onboarding after signup success', async () => {
     const fixture = mount();
+    await fixture.whenStable();
+    fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     el.querySelectorAll<HTMLButtonElement>('[role="tab"]')[1].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     const email = el.querySelector<HTMLInputElement>('input[name="email"]')!;
     const name = el.querySelector<HTMLInputElement>('input[name="name"]')!;
     const password = el.querySelector<HTMLInputElement>('input[name="password"]')!;
     email.value = 'a@b.co';
-    email.dispatchEvent(new Event('input'));
+    email.dispatchEvent(new Event('input', { bubbles: true }));
     name.value = 'Alex';
-    name.dispatchEvent(new Event('input'));
+    name.dispatchEvent(new Event('input', { bubbles: true }));
     password.value = 'hunter22';
-    password.dispatchEvent(new Event('input'));
+    password.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
     const router = TestBed.inject(Router);
     const nav = spyOn(router, 'navigateByUrl').and.callThrough();
     const form = el.querySelector<HTMLFormElement>('form')!;
-    form.dispatchEvent(new Event('submit'));
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await new Promise((r) => setTimeout(r, 500));
     await fixture.whenStable();
-    await new Promise((r) => setTimeout(r, 350));
     expect(nav).toHaveBeenCalledWith('/onboarding');
   });
 

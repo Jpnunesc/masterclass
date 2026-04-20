@@ -104,7 +104,7 @@ import { MaterialVirtualListComponent } from './ui/virtual-list.component';
           [material]="material"
           [kindLabel]="kindLabelFor(material.kind)"
           [closeLabel]="i18n.t('materials.detail.close')"
-          (close)="closeDetail()"
+          (closed)="closeDetail()"
         />
       }
 

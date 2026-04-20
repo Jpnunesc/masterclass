@@ -165,14 +165,17 @@ export class WhiteboardColumnComponent implements AfterViewInit, OnDestroy {
   readonly showJumpPill = computed(() => !this.nearBottom() && this.pendingUnseen());
 
   constructor() {
-    effect(() => {
-      const count = this.cards().length;
-      const prev = this.lastCount();
-      if (count > prev) {
-        queueMicrotask(() => this.handleCardAdded());
-      }
-      this.lastCount.set(count);
-    });
+    effect(
+      () => {
+        const count = this.cards().length;
+        const prev = this.lastCount();
+        if (count > prev) {
+          queueMicrotask(() => this.handleCardAdded());
+        }
+        this.lastCount.set(count);
+      },
+      { allowSignalWrites: true }
+    );
   }
 
   ngAfterViewInit(): void {

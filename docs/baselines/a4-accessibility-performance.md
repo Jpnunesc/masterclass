@@ -13,6 +13,17 @@ must not bust these without a deliberate budget update.
   - `apps/web/src/app/app.keyboard.spec.ts` — keyboard-only smoke: skip link is
     first tab stop, primary nav links are reachable, `#mc-main` is a programmatic
     focus target, no positive `tabindex` values.
+  - Per-route axe specs extend the gate to every implemented screen (SEV-31 C2):
+    Auth, Onboarding steps, Assessment, Classroom shell + states gallery,
+    Lesson preview, Materials Library, Review, Progress, Lesson History,
+    Profile. Any `wcag2aa` violation fails CI.
+  - `libs/feature/classroom/src/lib/classroom.keyboard.spec.ts` — Classroom
+    keyboard smoke (Tab order covers mic + gallery link, `M` toggles mic,
+    `Escape` cancels an armed mic without trapping focus, no positive
+    `tabindex`).
+  - `libs/feature/classroom/src/lib/reduced-motion.spec.ts` — SEV-31 regression
+    guard that avatar halo/mouth/thinking-dots/idle-breathe and mic halo/amp
+    animations are silenced under `prefers-reduced-motion: reduce`.
   - `libs/shared/a11y/**/*.spec.ts` — live-announcer + reduced-motion unit specs.
 - `npm run check:no-hex` — no raw hex in feature libs (SEV-7).
 - `npm run check:i18n` — EN/PT parity + no hard-coded strings (SEV-8).
@@ -33,9 +44,11 @@ must not bust these without a deliberate budget update.
 | `largest-contentful-paint` | ≤ 2000 ms (error)       | shell route `/index.html`    |
 | `total-blocking-time`      | ≤ 200 ms (error)        | shell route `/index.html`    |
 
-Routes audited on every run: `/index.html`, `/sandbox/tokens`, `/classroom`.
-Per-run runs: 3 (median is the decision value). Desktop preset; headless Chrome
-with `--no-sandbox`.
+Routes audited on every run (SEV-31 C2 — every implemented screen):
+`/index.html`, `/auth`, `/onboarding`, `/assessment`, `/classroom`, `/lesson`,
+`/materials`, `/review`, `/progress`, `/history`, `/profile`,
+`/sandbox/tokens`. Per-run runs: 3 (median is the decision value). Desktop
+preset; headless Chrome with `--no-sandbox`.
 
 ## Build-output baseline (measured at scaffold commit)
 

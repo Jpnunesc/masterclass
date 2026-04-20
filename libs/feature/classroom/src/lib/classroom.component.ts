@@ -353,11 +353,14 @@ export class ClassroomComponent implements OnInit, OnDestroy {
   );
 
   constructor() {
-    effect(() => {
-      if (this.drawerOpen()) {
-        this.lastSeenSystemCount.set(this.systemTurnCount());
-      }
-    });
+    effect(
+      () => {
+        if (this.drawerOpen()) {
+          this.lastSeenSystemCount.set(this.systemTurnCount());
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
 
   @HostListener('window:resize')

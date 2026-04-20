@@ -24,10 +24,7 @@ import {
   MATERIAL_EVENT_SINK,
   type MaterialEventSink
 } from './events/material-events';
-import {
-  AZURE_OPENAI_CONTENT,
-  type AzureOpenAiContent
-} from './clients/azure-openai-content.client';
+import { AZURE_OPENAI_CONTENT } from './clients/azure-openai-content.client';
 import {
   InMemoryContentStore,
   type ContentStore

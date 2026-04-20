@@ -24,7 +24,6 @@ import {
   type ReviewItem,
   type ReviewItemId,
   type ReviewQueueEntry,
-  type ReviewScheduleState,
   type ReviewSessionOutcome,
   type ReviewSessionState,
   type ReviewSkill,
