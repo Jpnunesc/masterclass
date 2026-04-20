@@ -32,6 +32,7 @@
       "@feature/auth": ["libs/feature/auth/src/index.ts"],
       "@feature/onboarding": ["libs/feature/onboarding/src/index.ts"],
       "@feature/classroom": ["libs/feature/classroom/src/index.ts"],
+      "@feature/lesson": ["libs/feature/lesson/src/index.ts"],
       "@feature/materials": ["libs/feature/materials/src/index.ts"],
       "@feature/review": ["libs/feature/review/src/index.ts"],
       "@feature/progress": ["libs/feature/progress/src/index.ts"],

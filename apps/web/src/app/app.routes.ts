@@ -29,6 +29,11 @@ export const APP_ROUTES: Routes = [
       import('@feature/classroom').then((m) => m.CLASSROOM_ROUTES)
   },
   {
+    path: 'lesson',
+    canActivate: [impersonateLearnerGuard],
+    loadChildren: () => import('@feature/lesson').then((m) => m.LESSON_ROUTES)
+  },
+  {
     path: 'materials',
     canActivate: [impersonateLearnerGuard],
     loadChildren: () =>
