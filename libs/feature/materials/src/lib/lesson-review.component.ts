@@ -361,9 +361,11 @@ import { AudioButtonComponent } from './ui/audio-button.component';
         border: 1px solid transparent;
       }
       .mc-btn--primary {
-        background: var(--mc-accent);
+        background: var(--mc-accent-600);
         color: var(--mc-accent-ink);
       }
+      .mc-btn--primary:hover:not(:disabled) { background: var(--mc-accent-700); }
+      .mc-btn--primary:active:not(:disabled) { background: var(--mc-accent-800); }
       .mc-btn--secondary {
         background: var(--mc-bg-raised);
         color: var(--mc-ink);

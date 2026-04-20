@@ -155,7 +155,7 @@ import { ProfileStateService } from './profile-state.service';
         color: var(--mc-ink);
       }
       .mc-field__input::placeholder {
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
       .mc-field__input:focus-visible {
         outline: 2px solid var(--mc-accent);

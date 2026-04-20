@@ -115,12 +115,12 @@ import type { MicState } from './classroom.types';
         pointer-events: none;
       }
       [data-state='armed'] {
-        background: var(--mc-accent);
+        background: var(--mc-accent-600);
         color: var(--mc-accent-ink);
         box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
       }
       [data-state='recording'] {
-        background: var(--mc-accent);
+        background: var(--mc-accent-600);
         color: var(--mc-accent-ink);
       }
       /* TODO(SEV-18 §2.3): replace canned keyframe with AnalyserNode-driven stroke-width tween (2px→8px on live RMS). Breathing halo below stays. */
@@ -133,12 +133,12 @@ import type { MicState } from './classroom.types';
         animation: mc-mic-breathe 2s var(--mc-ease-standard) infinite;
       }
       [data-state='paused'] {
-        background: var(--mc-accent);
+        background: var(--mc-accent-600);
         color: var(--mc-accent-ink);
         opacity: 0.7;
       }
       [data-state='processing'] {
-        background: var(--mc-accent);
+        background: var(--mc-accent-600);
         color: var(--mc-accent-ink);
       }
       [data-state='error'] {

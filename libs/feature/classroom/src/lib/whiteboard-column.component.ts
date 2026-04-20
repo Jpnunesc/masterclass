@@ -142,7 +142,7 @@ const NEAR_BOTTOM_PX = 120;
       .mc-board__objective {
         margin: 0;
         font-size: var(--mc-fs-body-sm);
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
     `
   ]

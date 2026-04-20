@@ -107,7 +107,7 @@ export interface TranscriptLabels {
         color: var(--mc-text-primary);
       }
       .mc-session-turn-time {
-        color: var(--mc-text-muted);
+        color: var(--mc-text-secondary);
         font-size: var(--mc-fs-body-sm);
       }
       .mc-session-turn-text {
@@ -148,9 +148,9 @@ export interface TranscriptLabels {
         font-size: var(--mc-fs-caption);
         text-transform: uppercase;
         letter-spacing: var(--mc-tracking-wide);
-        color: var(--mc-text-muted);
+        color: var(--mc-text-secondary);
       }
-      .mc-session-correction-before { color: var(--mc-text-muted); text-decoration: line-through; }
+      .mc-session-correction-before { color: var(--mc-text-secondary); text-decoration: line-through; }
       .mc-session-correction-after { color: var(--mc-text-primary); font-weight: 500; }
       .mc-session-correction-note {
         margin: 0;

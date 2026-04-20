@@ -244,11 +244,14 @@ interface ExerciseSubmitEvent {
         outline-offset: 2px;
       }
       .mc-btn-primary {
-        background: var(--mc-accent);
+        background: var(--mc-accent-600);
         color: var(--mc-accent-ink);
       }
       .mc-btn-primary:hover:not(:disabled) {
-        background: var(--mc-accent-600);
+        background: var(--mc-accent-700);
+      }
+      .mc-btn-primary:active:not(:disabled) {
+        background: var(--mc-accent-800);
       }
       .mc-btn-primary:disabled {
         opacity: 0.6;

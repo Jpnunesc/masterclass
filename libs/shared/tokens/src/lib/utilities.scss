@@ -60,7 +60,8 @@ a {
   line-height: var(--mc-lh-snug);
   letter-spacing: var(--mc-tracking-wide);
   text-transform: uppercase;
-  color: var(--mc-text-muted);
+  /* SEV-36: --mc-text-muted (ink-500) fails AA below 18px. Use ink-600. */
+  color: var(--mc-text-secondary);
 }
 
 /* ---------- Surface utilities ---------- */
@@ -115,11 +116,14 @@ a {
 }
 .mc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* SEV-36: white-on-clay-500 was 3.3:1 (AA fail). Button surface moves up the
+   ramp to clay-600/700/800; brand clay-500 stays for focus rings, links, halos. */
 .mc-btn-primary {
-  background: var(--mc-accent-500);
+  background: var(--mc-accent-600);
   color: var(--mc-accent-on);
 }
-.mc-btn-primary:hover:not(:disabled) { background: var(--mc-accent-600); }
+.mc-btn-primary:hover:not(:disabled) { background: var(--mc-accent-700); }
+.mc-btn-primary:active:not(:disabled) { background: var(--mc-accent-800); }
 
 .mc-btn-secondary {
   background: var(--mc-surface-raised);

@@ -33,6 +33,7 @@ export const color = {
     100: '#eeeae0'
   },
   clay: {
+    800: '#7a3d2a',
     700: '#9a4f36',
     600: '#b35d3f',
     500: '#cc785c',

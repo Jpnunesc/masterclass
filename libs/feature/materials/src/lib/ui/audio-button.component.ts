@@ -55,7 +55,7 @@ import { AudioControllerService, type AudioButtonState } from '../audio-controll
         width: 40px;
         height: 40px;
         padding: 0;
-        background: var(--mc-accent);
+        background: var(--mc-accent-600);
         color: var(--mc-accent-ink);
         border: 0;
         border-radius: var(--mc-radius-pill);
@@ -64,6 +64,8 @@ import { AudioControllerService, type AudioButtonState } from '../audio-controll
           background var(--mc-dur-2) var(--mc-ease-standard),
           color var(--mc-dur-2) var(--mc-ease-standard);
       }
+      .mc-audio-btn:hover:not(:disabled) { background: var(--mc-accent-700); }
+      .mc-audio-btn:active:not(:disabled) { background: var(--mc-accent-800); }
       .mc-audio-btn--secondary {
         background: var(--mc-bg-raised);
         color: var(--mc-ink);

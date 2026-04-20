@@ -80,10 +80,10 @@ import type { AvatarState, MicState } from './classroom.types';
         transition: color var(--mc-dur-2) var(--mc-ease-standard);
       }
       .mc-avatar-col__meta--dim {
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
       .mc-avatar-col__meta--dim .mc-avatar-col__sep {
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
       .mc-avatar-col__teacher {
         white-space: nowrap;
@@ -94,7 +94,7 @@ import type { AvatarState, MicState } from './classroom.types';
         white-space: nowrap;
       }
       .mc-avatar-col__sep {
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
       .mc-avatar-col__mic {
         display: flex;
@@ -105,7 +105,7 @@ import type { AvatarState, MicState } from './classroom.types';
       .mc-avatar-col__hint {
         margin: 0;
         font-size: var(--mc-fs-body-sm);
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
       .mc-avatar-col__session-meta {
         margin: 0;
@@ -115,7 +115,7 @@ import type { AvatarState, MicState } from './classroom.types';
         font-weight: 500;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
       @media (max-width: 48rem) {
         .mc-avatar-col__hint {

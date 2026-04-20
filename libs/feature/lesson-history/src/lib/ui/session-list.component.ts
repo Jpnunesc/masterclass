@@ -105,7 +105,7 @@ export interface SessionListLabels {
       .mc-session-list-meta {
         display: inline-flex;
         gap: var(--mc-gap-inline);
-        color: var(--mc-text-muted);
+        color: var(--mc-text-secondary);
         font-size: var(--mc-fs-body-sm);
       }
       .mc-session-list-empty {

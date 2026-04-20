@@ -106,7 +106,7 @@ import type { Material } from '../domain/material.types';
       .mc-material-duration::before {
         content: '·';
         margin-inline-end: var(--mc-space-2);
-        color: var(--mc-text-muted);
+        color: var(--mc-text-secondary);
       }
       .mc-material-favorite {
         background: transparent;
@@ -143,7 +143,7 @@ import type { Material } from '../domain/material.types';
       }
       .mc-material-viewed {
         font-size: var(--mc-fs-caption);
-        color: var(--mc-text-muted);
+        color: var(--mc-text-secondary);
       }
     `
   ]

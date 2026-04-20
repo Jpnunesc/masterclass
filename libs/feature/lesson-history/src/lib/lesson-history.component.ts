@@ -104,7 +104,7 @@ import { seedDemoSessions } from './pipeline/demo-sessions';
         grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
         align-items: start;
       }
-      .mc-lesson-history-meta { color: var(--mc-text-muted); }
+      .mc-lesson-history-meta { color: var(--mc-text-secondary); }
       .mc-lesson-history-placeholder {
         padding: var(--mc-pad-card);
         border-radius: var(--mc-radius-lg);

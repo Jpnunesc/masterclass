@@ -44,7 +44,7 @@ import { I18nService } from '@shared/i18n';
         color: var(--mc-ink);
       }
       .mc-footer__sep {
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
     `
   ]

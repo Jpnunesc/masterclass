@@ -142,7 +142,7 @@ export interface SessionDetailLabels {
         margin: var(--mc-space-2) 0 0 0;
         display: inline-flex;
         gap: var(--mc-gap-inline);
-        color: var(--mc-text-muted);
+        color: var(--mc-text-secondary);
         font-size: var(--mc-fs-body-sm);
         flex-wrap: wrap;
       }
@@ -171,7 +171,7 @@ export interface SessionDetailLabels {
         font-size: var(--mc-fs-caption);
         text-transform: uppercase;
         letter-spacing: var(--mc-tracking-wide);
-        color: var(--mc-text-muted);
+        color: var(--mc-text-secondary);
       }
       .mc-session-participant-name { color: var(--mc-text-primary); }
       .mc-session-pronunciation-phoneme {

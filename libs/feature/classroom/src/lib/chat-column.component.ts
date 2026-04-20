@@ -198,13 +198,13 @@ const NEAR_BOTTOM_PX = 120;
         font-weight: 500;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
       }
       .mc-chat__hint {
         appearance: none;
         background: transparent;
         border: 0;
-        color: var(--mc-ink-faint);
+        color: var(--mc-ink-muted);
         font-size: var(--mc-fs-body-sm);
         padding: var(--mc-space-3) var(--mc-space-4);
         text-align: start;

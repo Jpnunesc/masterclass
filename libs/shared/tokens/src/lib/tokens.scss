@@ -78,9 +78,10 @@
   --mc-color-ink-200: #ddd9cd;
   --mc-color-ink-100: #eeeae0;
 
+  --mc-color-clay-800: #7a3d2a;
   --mc-color-clay-700: #9a4f36;
   --mc-color-clay-600: #b35d3f;
-  --mc-color-clay-500: #cc785c;   /* brand accent */
+  --mc-color-clay-500: #cc785c;   /* brand accent — focus rings, links, halos, soft tints */
   --mc-color-clay-400: #da8d72;
   --mc-color-clay-300: #e7ae97;
   --mc-color-clay-200: #f2cfbf;
@@ -114,6 +115,8 @@
 
   --mc-accent-500: var(--mc-color-clay-500);
   --mc-accent-600: var(--mc-color-clay-600);
+  --mc-accent-700: var(--mc-color-clay-700);
+  --mc-accent-800: var(--mc-color-clay-800);
   --mc-accent-100: var(--mc-color-clay-100);
   --mc-accent-on: #ffffff;
 
@@ -260,8 +263,12 @@
   --mc-border-strong: #3d3b36;
   --mc-border-accent: #d68568;
 
+  /* Dark ramp inverts: higher number = lighter, so hover/press climb away
+     from the dark surface and stay > 4.5:1 against --mc-accent-on (#14140f). */
   --mc-accent-500: #d68568;
   --mc-accent-600: #e29a7e;
+  --mc-accent-700: #ecaf95;
+  --mc-accent-800: #f3c3b1;
   --mc-accent-100: #3a241b;
   --mc-accent-on: #14140f;
 
