@@ -21,6 +21,10 @@ describe('AppComponent', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    localStorage.removeItem('mc.locale');
+  });
+
   it('creates the root component', () => {
     const fixture = TestBed.createComponent(AppComponent);
     expect(fixture.componentInstance).toBeTruthy();
@@ -49,7 +53,7 @@ describe('AppComponent', () => {
 
     i18n.setLocale('pt-BR');
     fixture.detectChanges();
-    expect(el.textContent).toContain('Sala de aula');
+    expect(el.textContent).toContain('Progresso');
     expect(el.textContent).not.toContain('Classroom');
   });
 

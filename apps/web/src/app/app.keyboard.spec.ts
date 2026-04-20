@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { I18nService } from '@shared/i18n';
 import { getKeyboardFocusOrder } from '@shared/a11y/testing';
 
 import { AppComponent } from './app.component';
@@ -11,6 +12,7 @@ class DesktopBreakpointStub {
 
 describe('keyboard-only navigation smoke test', () => {
   beforeEach(async () => {
+    localStorage.removeItem('mc.locale');
     await TestBed.configureTestingModule({
       imports: [AppComponent],
       providers: [
@@ -18,6 +20,7 @@ describe('keyboard-only navigation smoke test', () => {
         { provide: BreakpointService, useClass: DesktopBreakpointStub }
       ]
     }).compileComponents();
+    TestBed.inject(I18nService).setLocale('en');
   });
 
   afterEach(() => {

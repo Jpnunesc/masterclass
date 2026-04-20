@@ -32,3 +32,7 @@ lhci-results/
 .env
 .env.local
 .env.*.local
+
+# Headless Chromium runtime libs (RHEL8 / minimal-image sandbox only)
+.chrome-deps/
+chrome-headless-shell/

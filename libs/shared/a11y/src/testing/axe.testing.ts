@@ -29,4 +29,5 @@ export function expectNoAxeViolations(results: AxeResults): void {
     const message = formatAxeViolations(results);
     throw new Error(`axe-core found ${results.violations.length} violation(s):\n\n${message}`);
   }
+  expect(results.violations.length).toBe(0);
 }
