@@ -86,6 +86,9 @@ const OPTIONS: readonly PillOption[] = [
         align-items: center;
         gap: var(--mc-space-3);
       }
+      @media (max-width: 767px) {
+        .mc-step { width: calc(100vw - 32px); }
+      }
       .mc-step__eyebrow {
         margin: 0;
         font-size: var(--mc-fs-caption);

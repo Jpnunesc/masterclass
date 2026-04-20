@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { I18nService, type I18nKey } from '@shared/i18n';
 
@@ -22,6 +23,12 @@ const LABEL_KEY: Record<StepKey, I18nKey> = {
   assessment: 'onboarding.breadcrumb.step.assessment'
 };
 
+const STEP_PATH: Record<StepKey, string> = {
+  language: '/onboarding/language',
+  teacher: '/onboarding/teacher',
+  assessment: '/onboarding/assessment'
+};
+
 @Component({
   selector: 'mc-progress-breadcrumb',
   standalone: true,
@@ -34,10 +41,19 @@ const LABEL_KEY: Record<StepKey, I18nKey> = {
     >
       @for (dot of dots(); track dot.key) {
         <li class="mc-breadcrumb__item" [attr.data-state]="dot.state">
-          <span
-            class="mc-breadcrumb__dot"
-            [attr.aria-current]="dot.state === 'current' ? 'step' : null"
-          ></span>
+          @if (dot.state === 'completed') {
+            <button
+              type="button"
+              class="mc-breadcrumb__dot mc-breadcrumb__dot--back"
+              [attr.aria-label]="backLabel(dot.label)"
+              (click)="goBack(dot.key)"
+            ></button>
+          } @else {
+            <span
+              class="mc-breadcrumb__dot"
+              [attr.aria-current]="dot.state === 'current' ? 'step' : null"
+            ></span>
+          }
           <span class="mc-breadcrumb__label">{{ i18n.t(dot.label) }}</span>
           <span class="mc-sr-only">{{ i18n.t(stateKey(dot.state)) }}</span>
         </li>
@@ -91,6 +107,19 @@ const LABEL_KEY: Record<StepKey, I18nKey> = {
           background var(--mc-dur-2) var(--mc-ease-standard),
           border-color var(--mc-dur-2) var(--mc-ease-standard);
       }
+      .mc-breadcrumb__dot--back {
+        padding: 0;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+      }
+      .mc-breadcrumb__dot--back:hover {
+        transform: scale(1.15);
+      }
+      .mc-breadcrumb__dot--back:focus-visible {
+        outline: 2px solid var(--mc-focus-ring, var(--mc-accent));
+        outline-offset: 3px;
+      }
       .mc-breadcrumb__item[data-state='completed'] .mc-breadcrumb__dot {
         background: var(--mc-ink);
         border-color: var(--mc-ink);
@@ -127,6 +156,7 @@ const LABEL_KEY: Record<StepKey, I18nKey> = {
 })
 export class ProgressBreadcrumbComponent {
   protected readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
 
   readonly current = input.required<StepKey>();
 
@@ -143,5 +173,13 @@ export class ProgressBreadcrumbComponent {
     if (state === 'completed') return 'onboarding.breadcrumb.state.completed';
     if (state === 'current') return 'onboarding.breadcrumb.state.current';
     return 'onboarding.breadcrumb.state.upcoming';
+  }
+
+  protected backLabel(labelKey: I18nKey): string {
+    return this.i18n.t('onboarding.breadcrumb.back', { step: this.i18n.t(labelKey) });
+  }
+
+  protected goBack(key: StepKey): void {
+    void this.router.navigateByUrl(STEP_PATH[key]);
   }
 }

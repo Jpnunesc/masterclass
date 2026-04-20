@@ -5,6 +5,13 @@
   margin-top: var(--mc-space-8);
   min-height: 264px;
 
+  &__fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mc-space-6);
+    animation: mc-auth-fade-in var(--mc-dur-2) var(--mc-ease-standard);
+  }
+
   &__cta {
     min-width: 240px;
     align-self: center;
@@ -38,7 +45,11 @@
 }
 
 @keyframes mc-auth-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .mc-auth-form__spinner { animation: none; } }
+@keyframes mc-auth-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .mc-auth-form__spinner { animation: none; }
+  .mc-auth-form__fields { animation-duration: 1ms; }
+}
 
 .mc-field {
   display: flex;
@@ -87,8 +98,13 @@
     padding: var(--mc-space-2);
     color: var(--mc-ink-muted);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--mc-dur-2) var(--mc-ease-standard);
   }
   &__affix:hover { color: var(--mc-ink); }
+  &__affix-icon { display: block; }
   &__help, &__error { margin: 0; font-size: var(--mc-fs-body-sm); }
   &__help { color: var(--mc-ink-muted); }
   &__error { color: var(--mc-status-danger); }

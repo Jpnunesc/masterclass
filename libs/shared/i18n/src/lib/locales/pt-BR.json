@@ -81,6 +81,7 @@
   "onboarding.breadcrumb.state.completed": "concluído",
   "onboarding.breadcrumb.state.current": "etapa atual",
   "onboarding.breadcrumb.state.upcoming": "próximo",
+  "onboarding.breadcrumb.back": "Voltar para {step}",
   "onboarding.step1.eyebrow": "ETAPA 1 DE 3",
   "onboarding.step1.title": "Vamos definir seu idioma.",
   "onboarding.step1.sub": "Escolha o idioma que vamos usar para explicar as coisas — você vai aprender inglês de qualquer forma.",

@@ -70,7 +70,9 @@ const TEACHER_NAME_KEY: Record<Teacher, I18nKey> = {
         [attr.aria-label]="i18n.t('onboarding.step3.preview.aria')"
         [id]="previewId"
       >
-        {{ previewCopy() }}
+        @for (t of [state.tone()]; track t) {
+          <span class="mc-tone-preview__text">{{ previewCopy() }}</span>
+        }
       </p>
 
       <button
@@ -95,6 +97,9 @@ const TEACHER_NAME_KEY: Record<Teacher, I18nKey> = {
         flex-direction: column;
         align-items: center;
         gap: var(--mc-space-3);
+      }
+      @media (max-width: 767px) {
+        .mc-step { width: calc(100vw - 32px); }
       }
       .mc-step__eyebrow {
         margin: 0;
@@ -156,6 +161,16 @@ const TEACHER_NAME_KEY: Record<Teacher, I18nKey> = {
         color: var(--mc-ink-muted);
         font-style: italic;
         text-align: center;
+      }
+      .mc-tone-preview__text {
+        animation: mc-tone-fade-in var(--mc-dur-2) var(--mc-ease-standard);
+      }
+      @keyframes mc-tone-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .mc-tone-preview__text { animation-duration: 1ms; }
       }
       .mc-step__cta {
         margin-top: var(--mc-space-8);

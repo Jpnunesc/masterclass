@@ -73,14 +73,14 @@ const CARDS: readonly TeacherCard[] = [
               </span>
             </div>
             <h2 class="mc-teacher-card__name">{{ i18n.t(card.nameKey) }}</h2>
-            <p class="mc-teacher-card__intro" [id]="introId(card.id)">
-              {{ i18n.t(card.introKey) }}
-            </p>
             @if (state.teacher() === card.id) {
               <span class="mc-teacher-card__selected">
                 {{ i18n.t('onboarding.step2.selected') }}
               </span>
             }
+            <p class="mc-teacher-card__intro" [id]="introId(card.id)">
+              {{ i18n.t(card.introKey) }}
+            </p>
           </button>
         }
       </div>
@@ -198,7 +198,7 @@ const CARDS: readonly TeacherCard[] = [
         line-height: var(--mc-lh-normal);
       }
       .mc-teacher-card__selected {
-        margin-top: var(--mc-space-3);
+        margin-top: var(--mc-space-1);
         font-size: var(--mc-fs-caption);
         letter-spacing: var(--mc-tracking-wide);
         text-transform: uppercase;

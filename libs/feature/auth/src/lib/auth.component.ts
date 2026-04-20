@@ -96,99 +96,112 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             [attr.aria-busy]="loading()"
             (ngSubmit)="onSubmit(form)"
           >
-            <div class="mc-field">
-              <label [attr.for]="emailId" class="mc-field__label">
-                {{ i18n.t('auth.field.email.label') }}
-              </label>
-              <input
-                [id]="emailId"
-                name="email"
-                type="email"
-                autocomplete="email"
-                class="mc-field__input"
-                [class.mc-field__input--error]="!!errors().email"
-                [attr.aria-invalid]="!!errors().email"
-                [attr.aria-describedby]="errors().email ? emailErrorId : null"
-                [disabled]="loading()"
-                [ngModel]="email()"
-                (ngModelChange)="onFieldInput('email', $event)"
-                (blur)="onFieldBlur('email')"
-                inputmode="email"
-              />
-              @if (errors().email) {
-                <p class="mc-field__error" [id]="emailErrorId">
-                  {{ i18n.t(errors().email!) }}
-                </p>
-              }
-            </div>
+            @for (m of [mode()]; track m) {
+              <div class="mc-auth-form__fields">
+                <div class="mc-field">
+                  <label [attr.for]="emailId" class="mc-field__label">
+                    {{ i18n.t('auth.field.email.label') }}
+                  </label>
+                  <input
+                    [id]="emailId"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    class="mc-field__input"
+                    [class.mc-field__input--error]="!!errors().email"
+                    [attr.aria-invalid]="!!errors().email"
+                    [attr.aria-describedby]="errors().email ? emailErrorId : null"
+                    [disabled]="loading()"
+                    [ngModel]="email()"
+                    (ngModelChange)="onFieldInput('email', $event)"
+                    (blur)="onFieldBlur('email')"
+                    inputmode="email"
+                  />
+                  @if (errors().email) {
+                    <p class="mc-field__error" [id]="emailErrorId">
+                      {{ i18n.t(errors().email!) }}
+                    </p>
+                  }
+                </div>
 
-            @if (isSignup()) {
-              <div class="mc-field">
-                <label [attr.for]="nameId" class="mc-field__label">
-                  {{ i18n.t('auth.field.name.label') }}
-                </label>
-                <input
-                  [id]="nameId"
-                  name="name"
-                  type="text"
-                  autocomplete="name"
-                  class="mc-field__input"
-                  [class.mc-field__input--error]="!!errors().name"
-                  [attr.aria-invalid]="!!errors().name"
-                  [attr.aria-describedby]="errors().name ? nameErrorId : null"
-                  [disabled]="loading()"
-                  [ngModel]="name()"
-                  (ngModelChange)="onFieldInput('name', $event)"
-                  (blur)="onFieldBlur('name')"
-                />
-                @if (errors().name) {
-                  <p class="mc-field__error" [id]="nameErrorId">
-                    {{ i18n.t(errors().name!) }}
-                  </p>
+                @if (isSignup()) {
+                  <div class="mc-field">
+                    <label [attr.for]="nameId" class="mc-field__label">
+                      {{ i18n.t('auth.field.name.label') }}
+                    </label>
+                    <input
+                      [id]="nameId"
+                      name="name"
+                      type="text"
+                      autocomplete="name"
+                      class="mc-field__input"
+                      [class.mc-field__input--error]="!!errors().name"
+                      [attr.aria-invalid]="!!errors().name"
+                      [attr.aria-describedby]="errors().name ? nameErrorId : null"
+                      [disabled]="loading()"
+                      [ngModel]="name()"
+                      (ngModelChange)="onFieldInput('name', $event)"
+                      (blur)="onFieldBlur('name')"
+                    />
+                    @if (errors().name) {
+                      <p class="mc-field__error" [id]="nameErrorId">
+                        {{ i18n.t(errors().name!) }}
+                      </p>
+                    }
+                  </div>
                 }
+
+                <div class="mc-field">
+                  <label [attr.for]="passwordId" class="mc-field__label">
+                    {{ i18n.t('auth.field.password.label') }}
+                  </label>
+                  <div class="mc-field__wrap">
+                    <input
+                      [id]="passwordId"
+                      name="password"
+                      [type]="showPassword() ? 'text' : 'password'"
+                      [autocomplete]="isSignup() ? 'new-password' : 'current-password'"
+                      class="mc-field__input mc-field__input--with-affix"
+                      [class.mc-field__input--error]="!!errors().password"
+                      [attr.aria-invalid]="!!errors().password"
+                      [attr.aria-describedby]="passwordDescribedBy()"
+                      [disabled]="loading()"
+                      [ngModel]="password()"
+                      (ngModelChange)="onFieldInput('password', $event)"
+                      (blur)="onFieldBlur('password')"
+                    />
+                    <button
+                      type="button"
+                      class="mc-field__affix"
+                      [attr.aria-label]="i18n.t(showPassword() ? 'auth.field.password.hide' : 'auth.field.password.show')"
+                      [attr.aria-pressed]="showPassword()"
+                      (click)="togglePassword()"
+                    >
+                      @if (showPassword()) {
+                        <svg class="mc-field__affix-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                          <path d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 0 1-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.48 7.48L21 21m-3.642-3.642l-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                        </svg>
+                      } @else {
+                        <svg class="mc-field__affix-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                          <path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                  @if (isSignup() && !errors().password) {
+                    <p class="mc-field__help" [id]="passwordHelpId">
+                      {{ i18n.t('auth.signup.password.help') }}
+                    </p>
+                  }
+                  @if (errors().password) {
+                    <p class="mc-field__error" [id]="passwordErrorId">
+                      {{ i18n.t(errors().password!) }}
+                    </p>
+                  }
+                </div>
               </div>
             }
-
-            <div class="mc-field">
-              <label [attr.for]="passwordId" class="mc-field__label">
-                {{ i18n.t('auth.field.password.label') }}
-              </label>
-              <div class="mc-field__wrap">
-                <input
-                  [id]="passwordId"
-                  name="password"
-                  [type]="showPassword() ? 'text' : 'password'"
-                  [autocomplete]="isSignup() ? 'new-password' : 'current-password'"
-                  class="mc-field__input mc-field__input--with-affix"
-                  [class.mc-field__input--error]="!!errors().password"
-                  [attr.aria-invalid]="!!errors().password"
-                  [attr.aria-describedby]="passwordDescribedBy()"
-                  [disabled]="loading()"
-                  [ngModel]="password()"
-                  (ngModelChange)="onFieldInput('password', $event)"
-                  (blur)="onFieldBlur('password')"
-                />
-                <button
-                  type="button"
-                  class="mc-field__affix"
-                  [attr.aria-label]="i18n.t(showPassword() ? 'auth.field.password.hide' : 'auth.field.password.show')"
-                  [attr.aria-pressed]="showPassword()"
-                  (click)="togglePassword()"
-                >
-                  <span aria-hidden="true">{{ showPassword() ? '🙈' : '👁' }}</span>
-                </button>
-              </div>
-              @if (isSignup() && !errors().password) {
-                <p class="mc-field__help" [id]="passwordHelpId">
-                  {{ i18n.t('auth.signup.password.help') }}
-                </p>
-              }
-              @if (errors().password) {
-                <p class="mc-field__error" [id]="passwordErrorId">
-                  {{ i18n.t(errors().password!) }}
-                </p>
-              }
-            </div>
 
             <button
               type="submit"
@@ -245,7 +258,7 @@ export class AuthComponent {
   protected readonly passwordErrorId = `${this.passwordId}-error`;
   protected readonly passwordHelpId = `${this.passwordId}-help`;
 
-  private readonly mode = signal<AuthMode>('login');
+  protected readonly mode = signal<AuthMode>('login');
   protected readonly isSignup = computed(() => this.mode() === 'signup');
 
   protected readonly email = signal('');
