@@ -130,17 +130,17 @@ const DENSITY_LABEL_KEYS: Readonly<Record<LibraryDensity, I18nKey>> = {
                   focusable="false"
                 >
                   @if (value === 'compact') {
-                    <line x1="4" y1="5.5" x2="16" y2="5.5" />
-                    <line x1="4" y1="9" x2="16" y2="9" />
-                    <line x1="4" y1="12.5" x2="16" y2="12.5" />
-                    <line x1="4" y1="16" x2="16" y2="16" />
+                    <line x1="4" y1="8" x2="16" y2="8" />
+                    <line x1="4" y1="10" x2="16" y2="10" />
+                    <line x1="4" y1="12" x2="16" y2="12" />
                   } @else if (value === 'comfortable') {
                     <line x1="4" y1="6" x2="16" y2="6" />
                     <line x1="4" y1="10" x2="16" y2="10" />
                     <line x1="4" y1="14" x2="16" y2="14" />
                   } @else {
-                    <line x1="4" y1="7" x2="16" y2="7" />
-                    <line x1="4" y1="13" x2="16" y2="13" />
+                    <line x1="4" y1="4" x2="16" y2="4" />
+                    <line x1="4" y1="10" x2="16" y2="10" />
+                    <line x1="4" y1="16" x2="16" y2="16" />
                   }
                 </svg>
                 <span class="mc-segmented__label">

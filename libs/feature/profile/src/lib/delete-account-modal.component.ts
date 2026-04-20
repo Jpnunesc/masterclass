@@ -86,7 +86,6 @@ import { ProfileStateService } from './profile-state.service';
           <button
             type="button"
             class="mc-btn mc-btn-destructive"
-            [disabled]="!canDelete()"
             [attr.aria-disabled]="!canDelete()"
             (click)="submit()"
           >

@@ -145,7 +145,6 @@ import { TEACHERS, type Teacher } from './profile.types';
             #saveBtn
             type="button"
             class="mc-btn mc-btn-primary"
-            [disabled]="!canSave()"
             [attr.aria-disabled]="!canSave()"
             (click)="save()"
           >
