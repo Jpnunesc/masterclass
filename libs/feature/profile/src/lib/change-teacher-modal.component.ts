@@ -205,11 +205,8 @@ import { TEACHERS, type Teacher } from './profile.types';
       }
       .mc-modal__title {
         margin: var(--mc-space-2) 0 0;
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-display-md);
-        font-weight: 400;
-        line-height: var(--mc-lh-tight);
-        letter-spacing: var(--mc-tracking-tight);
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
       }
       .mc-modal__close {
         border: 0;

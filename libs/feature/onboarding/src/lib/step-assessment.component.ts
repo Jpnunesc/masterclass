@@ -105,16 +105,13 @@ const TEACHER_NAME_KEY: Record<Teacher, I18nKey> = {
       }
       .mc-step__title {
         margin: 0;
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-display-lg);
-        font-weight: 400;
-        line-height: var(--mc-lh-tight);
-        letter-spacing: var(--mc-tracking-tight);
+        font: var(--mc-type-display-lg);
+        letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
         text-align: center;
       }
       @media (max-width: 767px) {
-        .mc-step__title { font-size: var(--mc-fs-display-md); }
+        .mc-step__title { font: var(--mc-type-display-md); }
       }
       .mc-step__sub {
         margin: 0;

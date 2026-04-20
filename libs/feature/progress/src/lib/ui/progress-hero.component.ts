@@ -23,11 +23,8 @@ import {
       .mc-progress-hero__line {
         margin: 0;
         color: var(--mc-ink);
-        font-family: var(--mc-font-display);
-        font-weight: 400;
-        letter-spacing: -0.01em;
-        line-height: 1.08;
-        font-size: var(--mc-progress-hero-fs, 2.5rem);
+        font: var(--mc-type-display-lg);
+        letter-spacing: var(--mc-tracking-display);
 
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -36,10 +33,7 @@ import {
         overflow: hidden;
       }
       @media (min-width: 48rem) {
-        .mc-progress-hero__line {
-          --mc-progress-hero-fs: 3.5rem;
-          line-height: 1.07;
-        }
+        .mc-progress-hero__line { font: var(--mc-type-display-xl); }
       }
     `
   ]

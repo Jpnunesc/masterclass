@@ -214,7 +214,8 @@ const TAG_KEYS: readonly LibraryTag[] = [
         text-transform: uppercase;
       }
       .mc-library__title {
-        font: var(--mc-fs-display-lg) / var(--mc-lh-tight) var(--mc-font-display);
+        font: var(--mc-type-display-lg);
+        letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
         margin: 0;
       }

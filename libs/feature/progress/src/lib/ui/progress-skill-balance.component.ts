@@ -91,9 +91,7 @@ export interface SkillBar {
         }
       }
       .mc-progress-skills__name {
-        font-family: var(--mc-font-body);
-        font-size: 1.375rem; /* 22 */
-        line-height: 1.27;
+        font: var(--mc-type-title);
         color: var(--mc-ink);
       }
       .mc-progress-skills__track {

@@ -34,16 +34,13 @@ a {
 }
 
 /* ---------- Typography utilities ---------- */
-.mc-display {
-  font-family: var(--mc-font-display);
-  letter-spacing: var(--mc-tracking-tight);
-  line-height: var(--mc-lh-tight);
-  font-weight: 400;
-}
-.mc-display-xl { @extend .mc-display; font-size: var(--mc-fs-display-xl); }
-.mc-display-lg { @extend .mc-display; font-size: var(--mc-fs-display-lg); }
-.mc-display-md { @extend .mc-display; font-size: var(--mc-fs-display-md); }
-.mc-display-sm { @extend .mc-display; font-size: var(--mc-fs-display-sm); }
+.mc-display { letter-spacing: var(--mc-tracking-display); }
+.mc-display-xl { @extend .mc-display; font: var(--mc-type-display-xl); }
+.mc-display-lg { @extend .mc-display; font: var(--mc-type-display-lg); }
+.mc-display-md { @extend .mc-display; font: var(--mc-type-display-md); }
+.mc-display-sm { @extend .mc-display; font: var(--mc-type-display-sm); }
+
+.mc-title { font: var(--mc-type-title); }
 
 .mc-heading {
   font-family: var(--mc-font-body);

@@ -264,7 +264,8 @@ import { AudioButtonComponent } from './ui/audio-button.component';
         margin: 0;
       }
       .mc-review__title {
-        font: var(--mc-fs-display-md) / var(--mc-lh-tight) var(--mc-font-display);
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
         margin: 0;
       }
@@ -355,7 +356,8 @@ import { AudioButtonComponent } from './ui/audio-button.component';
         text-align: center;
       }
       .mc-review__stat-num {
-        font: var(--mc-fs-display-md) / 1 var(--mc-font-display);
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
       }
       .mc-review__stat-label {
@@ -429,7 +431,8 @@ import { AudioButtonComponent } from './ui/audio-button.component';
         border-bottom-color: var(--mc-status-danger);
       }
       .mc-review__vocab-term {
-        font: var(--mc-fs-display-md) / 1.1 var(--mc-font-display);
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
         margin: 0;
       }

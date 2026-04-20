@@ -73,10 +73,11 @@ export const radius = {
 } as const;
 
 export const fontSize = {
-  displayXl: '4.5rem',
-  displayLg: '3.375rem',
-  displayMd: '2.5rem',
-  displaySm: '1.875rem',
+  displayXl: '3.5rem',
+  displayLg: '2.5rem',
+  displayMd: '2rem',
+  displaySm: '1.75rem',
+  title: '1.375rem',
   headingLg: '1.5rem',
   headingMd: '1.25rem',
   headingSm: '1.0625rem',

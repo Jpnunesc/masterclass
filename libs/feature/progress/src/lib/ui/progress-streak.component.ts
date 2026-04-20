@@ -50,11 +50,8 @@ export interface StreakDay {
       .mc-progress-streak__count {
         margin: 0;
         color: var(--mc-ink);
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-display-md);
-        line-height: 1.1;
-        font-weight: 400;
-        letter-spacing: -0.01em;
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
       }
       .mc-progress-streak__label {
         margin: var(--mc-space-2) 0 0;

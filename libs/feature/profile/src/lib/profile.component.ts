@@ -70,17 +70,12 @@ import { TeacherSectionComponent } from './teacher-section.component';
       }
       .mc-profile__title {
         margin: 0;
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-display-lg);
-        font-weight: 400;
-        line-height: var(--mc-lh-tight);
-        letter-spacing: var(--mc-tracking-tight);
+        font: var(--mc-type-display-lg);
+        letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
       }
       @media (max-width: 47.99rem) {
-        .mc-profile__title {
-          font-size: var(--mc-fs-display-md);
-        }
+        .mc-profile__title { font: var(--mc-type-display-md); }
       }
       .mc-profile__subtitle {
         margin: 0;

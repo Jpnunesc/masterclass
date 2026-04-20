@@ -87,10 +87,8 @@ export interface RailBucketLabel {
       .mc-progress-level__current {
         margin: 0;
         color: var(--mc-ink);
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-display-sm);
-        line-height: 1.2;
-        letter-spacing: -0.01em;
+        font: var(--mc-type-display-sm);
+        letter-spacing: var(--mc-tracking-display);
       }
 
       .mc-progress-level__rail {

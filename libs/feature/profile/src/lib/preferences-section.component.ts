@@ -206,17 +206,12 @@ const DENSITY_LABEL_KEYS: Readonly<Record<LibraryDensity, I18nKey>> = {
       }
       .mc-profile-section__title {
         margin: 0;
-        font-family: var(--mc-font-display);
-        font-size: var(--mc-fs-display-md);
-        font-weight: 400;
-        line-height: var(--mc-lh-tight);
-        letter-spacing: var(--mc-tracking-tight);
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
         color: var(--mc-ink);
       }
       @media (max-width: 47.99rem) {
-        .mc-profile-section__title {
-          font-size: var(--mc-fs-heading-lg);
-        }
+        .mc-profile-section__title { font: var(--mc-type-title); }
       }
       .mc-profile-section__helper {
         margin: 0;

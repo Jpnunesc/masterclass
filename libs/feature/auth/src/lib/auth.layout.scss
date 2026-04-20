@@ -55,16 +55,13 @@
 
   &__title {
     margin: 0;
-    font-family: var(--mc-font-display);
-    font-size: var(--mc-fs-display-lg);
-    line-height: var(--mc-lh-tight);
-    letter-spacing: var(--mc-tracking-tight);
-    font-weight: 400;
+    font: var(--mc-type-display-lg);
+    letter-spacing: var(--mc-tracking-display);
     text-align: center;
     color: var(--mc-ink);
   }
   @media (max-width: 767px) {
-    &__title { font-size: var(--mc-fs-display-md); }
+    &__title { font: var(--mc-type-display-md); }
   }
   &__sub {
     margin: var(--mc-space-3) 0 0;

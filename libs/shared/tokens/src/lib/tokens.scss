@@ -20,10 +20,13 @@
   --mc-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
     'Liberation Mono', monospace;
 
-  --mc-fs-display-xl: 4.5rem;   /* 72 */
-  --mc-fs-display-lg: 3.375rem; /* 54 */
-  --mc-fs-display-md: 2.5rem;   /* 40 */
-  --mc-fs-display-sm: 1.875rem; /* 30 */
+  /* Internal size aliases — align with SEV-3 §1.3 foundations spec.
+     Prefer the paired --mc-type-* tokens below in new code. */
+  --mc-fs-display-xl: 3.5rem;   /* 56 */
+  --mc-fs-display-lg: 2.5rem;   /* 40 */
+  --mc-fs-display-md: 2rem;     /* 32 */
+  --mc-fs-display-sm: 1.75rem;  /* 28 */
+  --mc-fs-title: 1.375rem;      /* 22 */
   --mc-fs-heading-lg: 1.5rem;   /* 24 */
   --mc-fs-heading-md: 1.25rem;  /* 20 */
   --mc-fs-heading-sm: 1.0625rem;/* 17 */
@@ -32,14 +35,32 @@
   --mc-fs-body-sm: 0.8125rem;
   --mc-fs-caption: 0.75rem;
 
+  /* Paired line-heights for the display/title scale. */
+  --mc-lh-display-xl: 3.75rem;  /* 60 */
+  --mc-lh-display-lg: 2.875rem; /* 46 */
+  --mc-lh-display-md: 2.375rem; /* 38 */
+  --mc-lh-display-sm: 2.125rem; /* 34 */
+  --mc-lh-title: 1.75rem;       /* 28 */
+
   --mc-lh-tight: 1.1;
   --mc-lh-snug: 1.25;
   --mc-lh-normal: 1.5;
   --mc-lh-loose: 1.7;
 
   --mc-tracking-tight: -0.02em;
+  --mc-tracking-display: -0.01em; /* SEV-3 §1.3 */
   --mc-tracking-normal: 0;
   --mc-tracking-wide: 0.04em;
+
+  /* Paired type tokens (SEV-3 §1.3 spec vocabulary).
+     Shorthand font: `<weight> <size> / <line-height> <family>`.
+     Consumers apply letter-spacing separately (see --mc-tracking-display
+     for display tier and --mc-tracking-wide for uppercase labels). */
+  --mc-type-display-xl: 400 var(--mc-fs-display-xl) / var(--mc-lh-display-xl) var(--mc-font-display);
+  --mc-type-display-lg: 400 var(--mc-fs-display-lg) / var(--mc-lh-display-lg) var(--mc-font-display);
+  --mc-type-display-md: 400 var(--mc-fs-display-md) / var(--mc-lh-display-md) var(--mc-font-display);
+  --mc-type-display-sm: 400 var(--mc-fs-display-sm) / var(--mc-lh-display-sm) var(--mc-font-display);
+  --mc-type-title: 500 var(--mc-fs-title) / var(--mc-lh-title) var(--mc-font-body);
 
   /* ---------- Color — warm paper palette ---------- */
   --mc-color-paper-00: #ffffff;
