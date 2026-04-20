@@ -178,8 +178,8 @@ export interface FilterChipsOptions {
       }
       .mc-filters__pill-remove {
         display: inline-flex;
-        width: 20px;
-        height: 20px;
+        width: 28px;
+        height: 28px;
         align-items: center;
         justify-content: center;
         padding: 0;
