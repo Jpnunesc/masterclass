@@ -12,6 +12,8 @@
  *
  *  The sandbox feature (`libs/feature/sandbox/**`) is developer-facing and
  *  exempt from rule #2, but its .json locale files are still in scope for #1.
+ *  Spec files (`*.spec.ts`) are also exempt: their inline template fixtures
+ *  never ship and their literal strings don't affect EN/PT parity.
  */
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -102,6 +104,7 @@ async function walk(dir) {
       continue;
     }
     if (!entry.isFile()) continue;
+    if (entry.name.endsWith('.spec.ts')) continue;
     if (entry.name.endsWith('.ts')) await scanTsFile(full);
     else if (entry.name.endsWith('.html')) await scanTemplate(full, await readFile(full, 'utf8'), 0);
   }
