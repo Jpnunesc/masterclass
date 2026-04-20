@@ -49,23 +49,27 @@ const TABS: readonly NavTab[] = [
         <span class="mc-topnav__wordmark">{{ i18n.t('common.brand.name') }}</span>
       </a>
 
-      <nav
-        class="mc-topnav__tabs"
-        [attr.aria-label]="i18n.t('common.nav.primary')"
-        #tabList
-      >
-        @for (tab of tabs; track tab.route) {
-          <a
-            class="mc-topnav__tab"
-            [routerLink]="tab.route"
-            routerLinkActive="is-active"
-            [routerLinkActiveOptions]="{ exact: false }"
-            (keydown)="onTabKey($event)"
-          >
-            <span class="mc-topnav__tab-label">{{ i18n.t(tab.key) }}</span>
-          </a>
-        }
-      </nav>
+      @if (classroomBreadcrumb(); as bc) {
+        <p class="mc-topnav__breadcrumb" aria-live="polite">{{ bc }}</p>
+      } @else {
+        <nav
+          class="mc-topnav__tabs"
+          [attr.aria-label]="i18n.t('common.nav.primary')"
+          #tabList
+        >
+          @for (tab of tabs; track tab.route) {
+            <a
+              class="mc-topnav__tab"
+              [routerLink]="tab.route"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: false }"
+              (keydown)="onTabKey($event)"
+            >
+              <span class="mc-topnav__tab-label">{{ i18n.t(tab.key) }}</span>
+            </a>
+          }
+        </nav>
+      }
 
       <div class="mc-topnav__right">
         <mc-language-selector />
@@ -168,6 +172,17 @@ const TABS: readonly NavTab[] = [
           transition: none;
         }
       }
+      .mc-topnav__breadcrumb {
+        margin: 0;
+        justify-self: center;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: var(--mc-font-body);
+        font-size: var(--mc-fs-body-sm);
+        color: var(--mc-ink-muted);
+      }
       .mc-topnav__right {
         display: inline-flex;
         align-items: center;
@@ -182,6 +197,7 @@ export class TopNavComponent {
 
   readonly profileName = input<string | null>(null);
   readonly profilePortraitUrl = input<string | null>(null);
+  readonly classroomBreadcrumb = input<string | null>(null);
   readonly openProfile = output<void>();
 
   protected readonly tabsRef = viewChild<ElementRef<HTMLElement>>('tabList');

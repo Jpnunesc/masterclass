@@ -12,6 +12,7 @@ import { filter } from 'rxjs/operators';
 import { I18nService } from '@shared/i18n';
 import { ToastRegionComponent } from '@shared/ui';
 import { LearnerSessionService } from '@feature/auth';
+import { ClassroomChromeService } from '@feature/classroom';
 
 import {
   AppDrawerComponent,
@@ -44,6 +45,7 @@ import {
           @if (bp.atLeastLg()) {
             <mc-top-nav
               [profileName]="profileName()"
+              [classroomBreadcrumb]="classroomBreadcrumb()"
               (openProfile)="onOpenProfile()"
             />
           } @else {
@@ -131,6 +133,7 @@ export class AppComponent {
   protected readonly bp = inject(BreakpointService);
   private readonly router = inject(Router);
   private readonly session = inject(LearnerSessionService);
+  private readonly chrome = inject(ClassroomChromeService);
 
   protected readonly drawerOpen = signal(false);
 
@@ -149,6 +152,14 @@ export class AppComponent {
   protected readonly profileName = computed(
     () => this.session.identity()?.displayName ?? null
   );
+
+  protected readonly classroomBreadcrumb = computed(() => {
+    const lesson = this.chrome.activeLesson();
+    if (!lesson) return null;
+    return this.i18n.t('classroom.breadcrumb', {
+      lesson: this.i18n.t(lesson.titleKey)
+    });
+  });
 
   constructor() {
     this.router.events
