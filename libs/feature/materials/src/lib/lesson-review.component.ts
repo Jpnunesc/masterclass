@@ -2,6 +2,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   ChangeDetectionStrategy,
   Component,
+  HostListener,
   ViewEncapsulation,
   computed,
   inject,
@@ -10,6 +11,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { I18nService, type I18nKey } from '@shared/i18n';
 
+import { AudioControllerService } from './audio-controller.service';
 import type {
   LessonReview,
   ReviewTab,
@@ -34,10 +36,35 @@ import { AudioButtonComponent } from './ui/audio-button.component';
       </nav>
 
       <header class="mc-review__head">
-        <p class="mc-review__eyebrow">{{ i18n.t('review.eyebrow') }}</p>
-        <h1 class="mc-review__title">{{ review().title }}</h1>
-        <p class="mc-review__meta">{{ metaLine() }}</p>
+        <div class="mc-review__head-text">
+          <p class="mc-review__eyebrow">{{ i18n.t('review.eyebrow') }}</p>
+          <h1 class="mc-review__title">{{ review().title }}</h1>
+          <p class="mc-review__meta">{{ metaLine() }}</p>
+        </div>
+        <div class="mc-review__head-actions">
+          @if (review().progress < 100) {
+            <a
+              class="mc-btn mc-btn--secondary"
+              [attr.href]="'/materials/lesson/' + review().lessonId + '?tab=transcript&resume=1'"
+            >{{ i18n.t('review.action.resume') }}</a>
+          }
+          <button
+            type="button"
+            class="mc-btn mc-btn--primary"
+            (click)="toggleReplay()"
+          >{{ i18n.t('review.action.replay') }}</button>
+        </div>
       </header>
+      @if (replayOpen()) {
+        <aside class="mc-review__replay" role="region" [attr.aria-label]="i18n.t('review.action.replay')">
+          <mc-audio-button
+            [id]="'replay-' + review().lessonId"
+            [ariaLabel]="i18n.t('review.action.replay')"
+            variant="primary"
+          />
+          <span class="mc-review__replay-meta">{{ metaLine() }}</span>
+        </aside>
+      }
 
       <div class="mc-review__tabs" role="tablist" [attr.aria-label]="i18n.t('review.eyebrow')">
         @for (tab of tabs; track tab) {
@@ -253,8 +280,67 @@ import { AudioButtonComponent } from './ui/audio-button.component';
         color: var(--mc-ink);
       }
       .mc-review__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--mc-space-4);
+        flex-wrap: wrap;
+      }
+      .mc-review__head-text {
         display: grid;
         gap: var(--mc-space-2);
+        min-width: 0;
+        flex: 1 1 24rem;
+      }
+      .mc-review__head-actions {
+        display: inline-flex;
+        gap: var(--mc-space-3);
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 720px) {
+        .mc-review__head-actions { width: 100%; }
+        .mc-review__head-actions > * { flex: 1 1 auto; justify-content: center; text-align: center; }
+      }
+      .mc-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 16px;
+        border-radius: var(--mc-radius-pill);
+        font: var(--mc-fs-caption) / 1 var(--mc-font-body);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid transparent;
+      }
+      .mc-btn--primary {
+        background: var(--mc-accent);
+        color: var(--mc-accent-ink);
+      }
+      .mc-btn--secondary {
+        background: var(--mc-bg-raised);
+        color: var(--mc-ink);
+        border-color: var(--mc-line-strong);
+      }
+      .mc-btn:focus-visible {
+        outline: 2px solid var(--mc-accent);
+        outline-offset: 2px;
+      }
+      .mc-review__replay {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--mc-space-3);
+        padding: var(--mc-space-3) var(--mc-space-4);
+        background: var(--mc-bg-raised);
+        border: 1px solid var(--mc-line);
+        border-radius: var(--mc-radius-md);
+      }
+      .mc-review__replay-meta {
+        font: var(--mc-fs-body-sm) / 1.3 var(--mc-font-body);
+        color: var(--mc-ink-muted);
       }
       .mc-review__eyebrow {
         font: var(--mc-fs-caption) / 1 var(--mc-font-body);
@@ -585,11 +671,23 @@ import { AudioButtonComponent } from './ui/audio-button.component';
       }
 
       .mc-review__empty {
-        padding: var(--mc-space-6);
+        margin: 0;
+        padding: var(--mc-space-8) var(--mc-space-6);
         background: var(--mc-bg-raised);
         border: 1px solid var(--mc-line);
         border-radius: var(--mc-radius-md);
-        color: var(--mc-ink-muted);
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
+        color: var(--mc-ink);
+        background-image: linear-gradient(
+          to bottom,
+          transparent 31px,
+          var(--mc-line) 31px,
+          var(--mc-line) 32px,
+          transparent 32px
+        );
+        background-size: 100% 32px;
+        background-repeat: repeat-y;
       }
 
       .mc-sr-only {
@@ -610,6 +708,12 @@ export class LessonReviewComponent {
   protected readonly i18n = inject(I18nService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly audio = inject(AudioControllerService);
+
+  @HostListener('window:keydown.escape')
+  protected onEscape(): void {
+    this.audio.stop();
+  }
 
   protected readonly tabs = REVIEW_TABS;
 
@@ -622,6 +726,12 @@ export class LessonReviewComponent {
   });
 
   private readonly activeSignal = signal<ReviewTab>('overview');
+  private readonly replaySignal = signal<boolean>(false);
+  protected readonly replayOpen = this.replaySignal.asReadonly();
+
+  protected toggleReplay(): void {
+    this.replaySignal.update((v) => !v);
+  }
 
   constructor() {
     const fromQuery = this.tabFromQuery().get('tab');

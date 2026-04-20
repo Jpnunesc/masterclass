@@ -131,8 +131,8 @@ const TAG_KEYS: readonly LibraryTag[] = [
             }
           </ul>
         } @else {
-          <div class="mc-library__empty">
-            <p>{{ i18n.t('materials.empty.saved') }}</p>
+          <div class="mc-library__empty" role="status">
+            <p class="mc-library__empty-title">{{ i18n.t('materials.empty.saved') }}</p>
           </div>
         }
       </section>
@@ -171,8 +171,8 @@ const TAG_KEYS: readonly LibraryTag[] = [
             }
           </ul>
         } @else {
-          <div class="mc-library__empty">
-            <p>
+          <div class="mc-library__empty" role="status">
+            <p class="mc-library__empty-title">
               {{ library.filtersActive()
                   ? i18n.t('materials.empty.filtered')
                   : i18n.t('materials.empty.all') }}
@@ -248,7 +248,7 @@ const TAG_KEYS: readonly LibraryTag[] = [
         align-items: baseline;
         gap: 8px;
         margin: 0;
-        font: var(--mc-fs-heading-md) / var(--mc-lh-snug) var(--mc-font-body);
+        font: var(--mc-type-title);
         color: var(--mc-ink);
       }
       .mc-library__count {
@@ -281,10 +281,31 @@ const TAG_KEYS: readonly LibraryTag[] = [
         overflow: hidden;
       }
       .mc-library__empty {
-        padding: var(--mc-space-6);
+        display: grid;
+        gap: var(--mc-space-2);
+        padding: var(--mc-space-8) var(--mc-space-6);
         background: var(--mc-bg-raised);
         border: 1px solid var(--mc-line);
         border-radius: var(--mc-radius-md);
+        background-image: linear-gradient(
+          to bottom,
+          transparent 31px,
+          var(--mc-line) 31px,
+          var(--mc-line) 32px,
+          transparent 32px
+        );
+        background-size: 100% 32px;
+        background-repeat: repeat-y;
+      }
+      .mc-library__empty-title {
+        margin: 0;
+        font: var(--mc-type-display-md);
+        letter-spacing: var(--mc-tracking-display);
+        color: var(--mc-ink);
+      }
+      .mc-library__empty-body {
+        margin: 0;
+        font: var(--mc-fs-body-lg) / var(--mc-lh-normal) var(--mc-font-body);
         color: var(--mc-ink-muted);
       }
       .mc-library__clear-link {
@@ -384,6 +405,32 @@ export class LibraryComponent implements OnInit, OnDestroy {
     } else if (ev.key === ']') {
       this.library.stepDensity(1);
       this.announceDensity();
+      ev.preventDefault();
+    } else if (ev.key === 'f' || ev.key === 'F') {
+      this.focusFirstFilterTrigger(ev);
+    } else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      this.moveRowFocus(ev.key === 'ArrowDown' ? 1 : -1, ev);
+    }
+  }
+
+  private focusFirstFilterTrigger(ev: KeyboardEvent): void {
+    const trigger = this.doc.querySelector<HTMLElement>('.mc-filters__trigger');
+    if (!trigger) return;
+    trigger.focus();
+    ev.preventDefault();
+  }
+
+  private moveRowFocus(delta: 1 | -1, ev: KeyboardEvent): void {
+    const active = this.doc.activeElement as HTMLElement | null;
+    if (!active?.classList?.contains('mc-lesson-row')) return;
+    const rows = Array.from(
+      this.doc.querySelectorAll<HTMLElement>('.mc-lesson-row')
+    );
+    const idx = rows.indexOf(active);
+    if (idx === -1) return;
+    const next = rows[Math.max(0, Math.min(rows.length - 1, idx + delta))];
+    if (next && next !== active) {
+      next.focus();
       ev.preventDefault();
     }
   }
