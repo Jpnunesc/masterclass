@@ -26,7 +26,7 @@ public sealed class GroqClient : IGroqClient
         CancellationToken ct = default)
     {
         if (!_options.IsConfigured)
-            throw new AiVendorException("Groq is not configured. Set Groq__ApiKey.");
+            throw new AiVendorException("Groq is not configured. Set Voice:Groq:ApiKey.");
         if (audio is null) throw new AiVendorException("Audio stream is required for transcription.");
         if (string.IsNullOrWhiteSpace(fileName)) fileName = "audio.webm";
 

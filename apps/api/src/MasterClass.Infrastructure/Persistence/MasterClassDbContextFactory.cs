@@ -7,7 +7,7 @@ public sealed class MasterClassDbContextFactory : IDesignTimeDbContextFactory<Ma
 {
     public MasterClassDbContext CreateDbContext(string[] args)
     {
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=masterclass;Username=postgres;Password=postgres";
 
         var options = new DbContextOptionsBuilder<MasterClassDbContext>()

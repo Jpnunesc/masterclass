@@ -20,11 +20,12 @@ public sealed class MasterClassWebApplicationFactory : WebApplicationFactory<Pro
 
     public MasterClassWebApplicationFactory()
     {
-        Environment.SetEnvironmentVariable("Jwt__Secret", "test-secret-that-is-long-enough-for-hs256-signing-1234");
-        Environment.SetEnvironmentVariable("Jwt__Issuer", "masterclass-api");
-        Environment.SetEnvironmentVariable("Jwt__Audience", "masterclass-web");
-        Environment.SetEnvironmentVariable("Jwt__AccessTokenLifetimeMinutes", "60");
-        Environment.SetEnvironmentVariable("ConnectionStrings__Default",
+        Environment.SetEnvironmentVariable("Jwt__SecretKey", "test-secret-that-is-long-enough-for-hs256-signing-1234");
+        Environment.SetEnvironmentVariable("Jwt__Issuer", "MasterClass.API");
+        Environment.SetEnvironmentVariable("Jwt__Audience", "MasterClass.Web");
+        Environment.SetEnvironmentVariable("Jwt__AccessTokenExpirationMinutes", "15");
+        Environment.SetEnvironmentVariable("Jwt__RefreshTokenExpirationDays", "7");
+        Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection",
             "Host=placeholder;Database=placeholder;Username=placeholder;Password=placeholder");
     }
 

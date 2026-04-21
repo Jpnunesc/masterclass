@@ -25,7 +25,7 @@ public sealed class ElevenLabsClient : IElevenLabsClient
     public async Task<AudioSynthesisResult> SynthesizeAsync(TtsRequest request, CancellationToken ct = default)
     {
         if (!_options.IsConfigured)
-            throw new AiVendorException("ElevenLabs is not configured. Set ElevenLabs__ApiKey.");
+            throw new AiVendorException("ElevenLabs is not configured. Set Voice:ElevenLabs:ApiKey.");
         if (string.IsNullOrWhiteSpace(request.Text))
             throw new AiVendorException("Text is required for TTS synthesis.");
         if (string.IsNullOrWhiteSpace(request.VoiceId))

@@ -47,8 +47,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration is required.");
-if (string.IsNullOrWhiteSpace(jwt.Secret) || jwt.Secret.Length < 32)
-    throw new InvalidOperationException("Jwt:Secret must be at least 32 characters (set via env var Jwt__Secret).");
+if (string.IsNullOrWhiteSpace(jwt.SecretKey) || jwt.SecretKey.Length < 32)
+    throw new InvalidOperationException("Jwt:SecretKey must be at least 32 characters (set via env var Jwt__SecretKey).");
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -62,7 +62,7 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwt.Issuer,
             ValidAudience = jwt.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey)),
             ClockSkew = TimeSpan.FromMinutes(1),
         };
     });

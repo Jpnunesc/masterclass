@@ -51,7 +51,7 @@ public sealed class AzureOpenAIClient : IAzureOpenAIClient
         if (!string.IsNullOrWhiteSpace(request.TargetLanguage))
             messages.Add(new ChatMessage("system", $"Target language: {request.TargetLanguage}"));
 
-        var json = await CompleteJsonAsync(messages, ct);
+        var json = await CompleteJsonAsync(messages, AiUseCase.Assessment, ct);
         try
         {
             var parsed = JsonSerializer.Deserialize<AssessmentPayload>(json, JsonOptions)
@@ -92,7 +92,7 @@ public sealed class AzureOpenAIClient : IAzureOpenAIClient
                 messages.Add(new ChatMessage(turn.Role, turn.Content));
         messages.Add(new ChatMessage("user", request.StudentUtterance));
 
-        var json = await CompleteJsonAsync(messages, ct);
+        var json = await CompleteJsonAsync(messages, AiUseCase.Conversation, ct);
         try
         {
             var parsed = JsonSerializer.Deserialize<LessonTurnPayload>(json, JsonOptions)
@@ -124,7 +124,7 @@ public sealed class AzureOpenAIClient : IAzureOpenAIClient
         messages.Add(new ChatMessage("user", request.StudentUtterance));
 
         using var body = BuildRequestContent(messages, stream: true, responseFormat: null);
-        using var req = new HttpRequestMessage(HttpMethod.Post, BuildChatUrl()) { Content = body };
+        using var req = new HttpRequestMessage(HttpMethod.Post, BuildChatUrl(AiUseCase.Conversation)) { Content = body };
         req.Headers.TryAddWithoutValidation("api-key", _options.ApiKey);
 
         using var resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -182,7 +182,7 @@ public sealed class AzureOpenAIClient : IAzureOpenAIClient
             new("user", $"Generate the materials now."),
         };
 
-        var json = await CompleteJsonAsync(messages, ct);
+        var json = await CompleteJsonAsync(messages, AiUseCase.MaterialGeneration, ct);
         try
         {
             var parsed = JsonSerializer.Deserialize<MaterialsPayload>(json, JsonOptions)
@@ -203,10 +203,10 @@ public sealed class AzureOpenAIClient : IAzureOpenAIClient
         }
     }
 
-    private async Task<string> CompleteJsonAsync(List<ChatMessage> messages, CancellationToken ct)
+    private async Task<string> CompleteJsonAsync(List<ChatMessage> messages, AiUseCase useCase, CancellationToken ct)
     {
         using var body = BuildRequestContent(messages, stream: false, responseFormat: new { type = "json_object" });
-        using var req = new HttpRequestMessage(HttpMethod.Post, BuildChatUrl()) { Content = body };
+        using var req = new HttpRequestMessage(HttpMethod.Post, BuildChatUrl(useCase)) { Content = body };
         req.Headers.TryAddWithoutValidation("api-key", _options.ApiKey);
 
         using var resp = await _http.SendAsync(req, ct);
@@ -239,14 +239,14 @@ public sealed class AzureOpenAIClient : IAzureOpenAIClient
         return JsonContent.Create(payload, options: JsonOptions);
     }
 
-    private string BuildChatUrl() =>
-        $"{_options.Endpoint!.TrimEnd('/')}/openai/deployments/{_options.DeploymentName}/chat/completions?api-version={_options.ApiVersion}";
+    private string BuildChatUrl(AiUseCase useCase) =>
+        $"{_options.Endpoint!.TrimEnd('/')}/openai/deployments/{_options.ModelRouting.Resolve(useCase)}/chat/completions?api-version={_options.ApiVersion}";
 
     private void EnsureConfigured()
     {
         if (!_options.IsConfigured)
             throw new AiVendorException(
-                "Azure OpenAI is not configured. Set AzureOpenAI__Endpoint, AzureOpenAI__ApiKey, AzureOpenAI__DeploymentName.");
+                "Azure OpenAI is not configured. Set AI:Endpoint, AI:ApiKey, and AI:ModelRouting:{Conversation,Assessment,MaterialGeneration}.");
     }
 
     private sealed record ChatMessage(

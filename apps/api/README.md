@@ -32,22 +32,28 @@ All secrets and deployment-specific values come from environment variables — n
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `ConnectionStrings__Default` | yes | Postgres connection string (e.g. `Host=localhost;Port=5432;Database=masterclass;Username=postgres;Password=...`) |
-| `Jwt__Secret` | yes | HMAC-SHA256 signing key, ≥ 32 chars |
-| `Jwt__Issuer` | no | Defaults to `masterclass-api` |
-| `Jwt__Audience` | no | Defaults to `masterclass-web` |
-| `Jwt__AccessTokenLifetimeMinutes` | no | Defaults to `60` |
-| `AzureOpenAI__Endpoint` | for AI features | e.g. `https://my-resource.openai.azure.com` |
-| `AzureOpenAI__ApiKey` | for AI features | Azure OpenAI resource key |
-| `AzureOpenAI__DeploymentName` | for AI features | Chat-capable deployment name (e.g. `gpt-4o`) |
-| `AzureOpenAI__ApiVersion` | no | Defaults to `2024-06-01` |
-| `AzureOpenAI__Temperature` | no | Defaults to `0.3` |
-| `AzureOpenAI__MaxOutputTokens` | no | Defaults to `800` |
-| `ElevenLabs__ApiKey` | for TTS | ElevenLabs API key |
-| `ElevenLabs__ModelId` | no | Defaults to `eleven_turbo_v2_5` |
-| `ElevenLabs__OutputFormat` | no | Defaults to `mp3_44100_128` |
-| `Groq__ApiKey` | for STT | Groq API key |
-| `Groq__Model` | no | Defaults to `whisper-large-v3-turbo` |
+| `ConnectionStrings__DefaultConnection` | yes | Postgres connection string (e.g. `Host=localhost;Port=5432;Database=masterclass;Username=postgres;Password=...`) |
+| `Jwt__SecretKey` | yes | HMAC-SHA256 signing key, ≥ 32 chars |
+| `Jwt__Issuer` | no | Defaults to `MasterClass.API` |
+| `Jwt__Audience` | no | Defaults to `MasterClass.Web` |
+| `Jwt__AccessTokenExpirationMinutes` | no | Defaults to `15` |
+| `Jwt__RefreshTokenExpirationDays` | no | Defaults to `7` (refresh endpoint pending) |
+| `AI__Endpoint` | for AI features | e.g. `https://my-resource.openai.azure.com` |
+| `AI__ApiKey` | for AI features | Azure OpenAI resource key |
+| `AI__ModelRouting__Conversation` | for AI features | Chat deployment used for live lesson turns |
+| `AI__ModelRouting__Assessment` | for AI features | Chat deployment used for CEFR assessment |
+| `AI__ModelRouting__MaterialGeneration` | for AI features | Chat deployment used for materials generation |
+| `AI__ModelRouting__Analysis` | no | Optional; falls back to Conversation deployment if unset |
+| `AI__ApiVersion` | no | Defaults to `2024-06-01` |
+| `AI__Temperature` | no | Defaults to `0.3` |
+| `AI__MaxOutputTokens` | no | Defaults to `800` |
+| `Voice__ElevenLabs__ApiKey` | for TTS | ElevenLabs API key |
+| `Voice__ElevenLabs__ModelId` | no | Defaults to `eleven_multilingual_v2` |
+| `Voice__ElevenLabs__VoiceIdFemale` | no | Default female voice id (per-request `voiceId` overrides) |
+| `Voice__ElevenLabs__VoiceIdMale` | no | Default male voice id |
+| `Voice__ElevenLabs__OutputFormat` | no | Defaults to `mp3_44100_128` |
+| `Voice__Groq__ApiKey` | for STT | Groq API key |
+| `Voice__Groq__Model` | no | Defaults to `whisper-large-v3-turbo` |
 
 AI env vars are only required when the corresponding endpoint is invoked; the API boots without them. Missing config produces a `502 Bad Gateway` at call time with an explicit message, not a crash at startup.
 
@@ -55,8 +61,8 @@ AI env vars are only required when the corresponding endpoint is invoked; the AP
 
 ```bash
 # From apps/api/
-export ConnectionStrings__Default="Host=localhost;Port=5432;Database=masterclass;Username=postgres;Password=postgres"
-export Jwt__Secret="change-me-to-something-long-and-random-32-plus-chars"
+export ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=masterclass;Username=postgres;Password=postgres"
+export Jwt__SecretKey="change-me-to-something-long-and-random-32-plus-chars"
 
 dotnet restore
 dotnet run --project src/MasterClass.Api
@@ -79,7 +85,7 @@ Requires a fresh Postgres and `dotnet-ef` CLI (`dotnet tool install --global dot
 
 ```bash
 # Apply initial schema
-export ConnectionStrings__Default="Host=localhost;Port=5432;Database=masterclass;Username=postgres;Password=postgres"
+export ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=masterclass;Username=postgres;Password=postgres"
 dotnet ef database update \
   --project src/MasterClass.Infrastructure \
   --startup-project src/MasterClass.Infrastructure

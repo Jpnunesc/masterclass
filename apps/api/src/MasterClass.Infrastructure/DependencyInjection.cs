@@ -13,8 +13,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("Default")
-            ?? throw new InvalidOperationException("ConnectionStrings:Default is required (set via env var ConnectionStrings__Default).");
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required (set via env var ConnectionStrings__DefaultConnection).");
 
         services.AddDbContext<MasterClassDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IMasterClassDbContext>(sp => sp.GetRequiredService<MasterClassDbContext>());

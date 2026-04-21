@@ -15,14 +15,14 @@ public sealed class JwtTokenIssuer : ITokenIssuer
     public JwtTokenIssuer(IOptions<JwtOptions> options)
     {
         _options = options.Value;
-        if (string.IsNullOrWhiteSpace(_options.Secret) || _options.Secret.Length < 32)
-            throw new InvalidOperationException("Jwt:Secret must be configured with at least 32 characters (set via env var Jwt__Secret).");
+        if (string.IsNullOrWhiteSpace(_options.SecretKey) || _options.SecretKey.Length < 32)
+            throw new InvalidOperationException("Jwt:SecretKey must be configured with at least 32 characters (set via env var Jwt__SecretKey).");
     }
 
     public IssuedToken Issue(Student student)
     {
         var now = DateTimeOffset.UtcNow;
-        var expires = now.AddMinutes(_options.AccessTokenLifetimeMinutes);
+        var expires = now.AddMinutes(_options.AccessTokenExpirationMinutes);
 
         var claims = new[]
         {
@@ -32,7 +32,7 @@ public sealed class JwtTokenIssuer : ITokenIssuer
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
