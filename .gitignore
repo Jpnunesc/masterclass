@@ -37,7 +37,7 @@ lhci-results/
 .chrome-deps/
 chrome-headless-shell/
 
-# .NET build output (sibling backend, Clean Architecture)
+# .NET build output (apps/api Clean Architecture solution)
 bin/
 obj/
 *.user
@@ -47,8 +47,16 @@ obj/
 *.pidb
 *.pdb
 *.dll.config
+appsettings.Development.json
 appsettings.*.local.json
 *.secrets.json
+TestResults/
+*.trx
+*.coverage
+.vs/
+.idea_modules/
+*.DotSettings.user
+launchSettings.Development.json
 
 # Credential leftovers
 *.pem
