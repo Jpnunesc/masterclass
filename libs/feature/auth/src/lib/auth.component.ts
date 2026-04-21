@@ -86,14 +86,17 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             </button>
           </div>
 
+          <div
+            class="mc-auth-form-panel"
+            role="tabpanel"
+            [id]="formId"
+            [attr.aria-labelledby]="titleId"
+            [attr.aria-busy]="loading()"
+          >
           <form
             #form="ngForm"
             class="mc-auth-form"
             novalidate
-            [id]="formId"
-            role="tabpanel"
-            [attr.aria-labelledby]="titleId"
-            [attr.aria-busy]="loading()"
             (ngSubmit)="onSubmit(form)"
           >
             @for (m of [mode()]; track m) {
@@ -223,6 +226,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
               {{ i18n.t(isSignup() ? 'auth.switch.to_login' : 'auth.switch.to_signup') }}
             </button>
           </form>
+          </div>
         </section>
       </main>
 
