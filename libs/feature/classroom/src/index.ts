@@ -3,3 +3,6 @@ export * from './lib/classroom.component';
 export * from './lib/classroom-chrome.service';
 export * from './lib/classroom-session.service';
 export * from './lib/classroom.types';
+export * from './lib/transport/classroom-protocol';
+export * from './lib/transport/websocket-factory';
+export * from './lib/transport/classroom-transport.service';
