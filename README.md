@@ -1,8 +1,11 @@
 # MasterClass AI English — Web monorepo
 
-Angular 17 monorepo for the MasterClass AI English tutoring platform. This repo
-owns the Angular frontend (`apps/web`) plus shared + feature libraries. Backend
-(.NET Clean Architecture) lives in a sibling repo.
+**Status: v1.0 — initial public drop.** Angular 17 monorepo for the MasterClass
+AI English tutoring platform. This repo owns the Angular frontend (`apps/web`)
+plus shared + feature libraries. The .NET Clean Architecture backend (Azure
+OpenAI orchestration, ElevenLabs TTS, Groq STT) will land in a sibling repo;
+frontend speaks to it via injected client tokens (`AZURE_OPENAI_JUDGE`,
+`ELEVENLABS_TTS`, `GROQ_STT`) so no credentials are held in this repo.
 
 ## Layout
 
@@ -66,6 +69,20 @@ so features can depend on `@shared/tokens` without churn once real tokens land.
 
 - Node 20 (see `.nvmrc`)
 - npm 10+
+
+## Backend (sibling repo, Clean Architecture)
+
+The .NET backend is not part of this repo. Once the sibling repo is published
+it will expose the Azure OpenAI / ElevenLabs / Groq integrations behind the
+client tokens above. Typical local run:
+
+```
+dotnet restore
+dotnet run --project src/MasterClass.Api
+```
+
+Credentials (`AZURE_OPENAI_API_KEY`, `ELEVENLABS_API_KEY`, `GROQ_API_KEY`) must
+come from environment variables or a user-secrets store — never commit them.
 
 ## CI
 

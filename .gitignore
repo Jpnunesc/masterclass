@@ -36,3 +36,23 @@ lhci-results/
 # Headless Chromium runtime libs (RHEL8 / minimal-image sandbox only)
 .chrome-deps/
 chrome-headless-shell/
+
+# .NET build output (sibling backend, Clean Architecture)
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.pidb
+*.pdb
+*.dll.config
+appsettings.*.local.json
+*.secrets.json
+
+# Credential leftovers
+*.pem
+*.pfx
+*.p12
+*.key
+credentials.json
