@@ -28,6 +28,7 @@
       "@shared/i18n": ["libs/shared/i18n/src/index.ts"],
       "@shared/a11y": ["libs/shared/a11y/src/index.ts"],
       "@shared/a11y/testing": ["libs/shared/a11y/src/testing/index.ts"],
+      "@shared/api": ["libs/shared/api/src/index.ts"],
       "@feature/assessment": ["libs/feature/assessment/src/index.ts"],
       "@feature/auth": ["libs/feature/auth/src/index.ts"],
       "@feature/onboarding": ["libs/feature/onboarding/src/index.ts"],
