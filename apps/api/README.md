@@ -1,6 +1,6 @@
 # MasterClass API (`apps/api/`)
 
-.NET 8 Clean Architecture backend for MasterClass. Phase 1 scaffold — structure, Postgres schema, and JWT auth skeleton. No AI vendor integration yet (that lands in Phase 2, tracked under SEV-41).
+.NET 8 Clean Architecture backend for MasterClass. Phases 1 & 2 landed — structure, Postgres schema, JWT auth skeleton, and AI vendor integration (Azure OpenAI + ElevenLabs + Groq) with a WebSocket classroom hub.
 
 ## Stack
 
@@ -37,10 +37,19 @@ All secrets and deployment-specific values come from environment variables — n
 | `Jwt__Issuer` | no | Defaults to `masterclass-api` |
 | `Jwt__Audience` | no | Defaults to `masterclass-web` |
 | `Jwt__AccessTokenLifetimeMinutes` | no | Defaults to `60` |
-| `AzureOpenAI__Endpoint` | Phase 2 | Reserved for SEV-41 |
-| `AzureOpenAI__ApiKey` | Phase 2 | Reserved for SEV-41 |
-| `ElevenLabs__ApiKey` | Phase 2 | Reserved for SEV-41 |
-| `Groq__ApiKey` | Phase 2 | Reserved for SEV-41 |
+| `AzureOpenAI__Endpoint` | for AI features | e.g. `https://my-resource.openai.azure.com` |
+| `AzureOpenAI__ApiKey` | for AI features | Azure OpenAI resource key |
+| `AzureOpenAI__DeploymentName` | for AI features | Chat-capable deployment name (e.g. `gpt-4o`) |
+| `AzureOpenAI__ApiVersion` | no | Defaults to `2024-06-01` |
+| `AzureOpenAI__Temperature` | no | Defaults to `0.3` |
+| `AzureOpenAI__MaxOutputTokens` | no | Defaults to `800` |
+| `ElevenLabs__ApiKey` | for TTS | ElevenLabs API key |
+| `ElevenLabs__ModelId` | no | Defaults to `eleven_turbo_v2_5` |
+| `ElevenLabs__OutputFormat` | no | Defaults to `mp3_44100_128` |
+| `Groq__ApiKey` | for STT | Groq API key |
+| `Groq__Model` | no | Defaults to `whisper-large-v3-turbo` |
+
+AI env vars are only required when the corresponding endpoint is invoked; the API boots without them. Missing config produces a `502 Bad Gateway` at call time with an explicit message, not a crash at startup.
 
 ## Run locally
 
@@ -89,8 +98,50 @@ The initial migration creates the tables: `students`, `lessons`, `assessment_res
 
 Request / response shapes match the `MasterClass.Application.Auth` records (`RegisterRequest`, `LoginRequest`, `AuthResponse`, `StudentProfile`).
 
+## AI endpoints
+
+Shapes live in `MasterClass.Application.Ai` (see `AiModels.cs`). Errors from upstream vendors surface as `502 Bad Gateway` with an `error`/`title` body.
+
+| Method | Route | Auth | Body | Returns |
+|---|---|---|---|---|
+| POST | `/api/assessment/evaluate` | anonymous (v1) | `AssessmentRequest { conversation: ChatTurn[], targetLanguage? }` | `AssessmentEvaluation { level, rationale, strengths[], weaknesses[] }` |
+| POST | `/api/lesson/turn` | anonymous (v1) | `LessonTurnRequest { studentLevel, topic, studentUtterance, history?, targetLanguage? }` | `LessonTurnResult { teacherResponse, corrections[] }` |
+| POST | `/api/lesson/turn?stream=true` | anonymous (v1) | same | `text/event-stream` with `data: {"delta":"..."}` chunks terminated by `data: [DONE]` |
+| POST | `/api/materials/generate` | anonymous (v1) | `MaterialsRequest { level, topic, vocabCount?, exerciseCount?, targetLanguage? }` | `GeneratedMaterials { lessonTitle, lessonSummary, vocabulary[], exercises[] }` |
+| POST | `/api/tts/synthesize` | anonymous (v1) | `TtsRequest { text, voiceId }` | `audio/mpeg` binary stream |
+| POST | `/api/stt/transcribe` | anonymous (v1) | `multipart/form-data` with `file` + optional `language` field | `TranscriptionResult { text, language }` |
+
+> Auth on AI endpoints will tighten in Phase 3 once the Angular client wires its JWT; Phase 2 keeps them open for developer integration work.
+
+## Classroom WebSocket (`/ws/classroom`)
+
+Live teacher pipeline: client audio → Groq STT → Azure OpenAI lesson turn → ElevenLabs TTS → client audio + text. Closes the `session.locale` follow-up from v1.0 (§1.13).
+
+**Connect** with a query string:
+
+```
+ws(s)://<host>/ws/classroom?level=B1&topic=travel&voiceId=<voice>&locale=en-US&audioFormat=webm
+```
+
+**Server → client (text JSON frames)**
+- `{ "type": "session.open", "locale": "en-US", "level": "B1", "topic": "travel" }` — first frame on accept
+- `{ "type": "session.locale", "locale": "en-US" }` — emitted on connect and whenever the locale changes
+- `{ "type": "student.transcript", "text": "...", "language": "en" }`
+- `{ "type": "teacher.turn", "text": "...", "corrections": [...] }`
+- `{ "type": "teacher.audio.begin", "contentType": "audio/mpeg" }` → one or more **binary** frames → `{ "type": "teacher.audio.end" }`
+- `{ "type": "error", "message": "..." }` on vendor or protocol errors
+- `{ "type": "session.reset.ok" }` after a successful reset
+
+**Client → server**
+- `{ "type": "locale.set", "locale": "pt-BR" }` — change session locale
+- `{ "type": "student.utterance.begin", "audioFormat": "webm" }` — start capturing an utterance (optional)
+- **binary frames** — audio chunks (the server buffers them)
+- `{ "type": "student.utterance.end" }` — triggers STT → Chat → TTS
+- `{ "type": "student.text", "text": "..." }` — skip STT, run Chat + TTS directly
+- `{ "type": "session.reset" }` — clear conversation history
+
 ## Phase roadmap
 
-- **Phase 1** (this) — Structure, DB schema, auth skeleton. *Done when `dotnet test` is green and the migration applies to a fresh Postgres.*
-- **Phase 2** (SEV-41) — AI vendor integration (Azure OpenAI / ElevenLabs / Groq) + WebSocket classroom.
-- **Phase 3** — Angular (`apps/web/`) cutover from mock services to real `/api` endpoints.
+- **Phase 1** (SEV-42, done) — Structure, DB schema, auth skeleton.
+- **Phase 2** (SEV-43, done) — AI vendor integration (Azure OpenAI / ElevenLabs / Groq) + WebSocket classroom.
+- **Phase 3** (SEV-44) — Angular (`apps/web/`) cutover from mock services to real `/api` endpoints.

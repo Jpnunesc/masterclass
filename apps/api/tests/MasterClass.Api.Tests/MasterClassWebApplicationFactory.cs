@@ -1,4 +1,6 @@
 using System.Data.Common;
+using MasterClass.Api.Tests.Fakes;
+using MasterClass.Application.Ai;
 using MasterClass.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -11,6 +13,10 @@ namespace MasterClass.Api.Tests;
 public sealed class MasterClassWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private DbConnection? _sqliteConnection;
+
+    public FakeAzureOpenAIClient AzureFake { get; } = new();
+    public FakeElevenLabsClient ElevenFake { get; } = new();
+    public FakeGroqClient GroqFake { get; } = new();
 
     public MasterClassWebApplicationFactory()
     {
@@ -31,7 +37,10 @@ public sealed class MasterClassWebApplicationFactory : WebApplicationFactory<Pro
             var descriptorsToRemove = services.Where(d =>
                 d.ServiceType == typeof(DbContextOptions<MasterClassDbContext>) ||
                 d.ServiceType == typeof(MasterClassDbContext) ||
-                d.ServiceType == typeof(DbConnection)).ToList();
+                d.ServiceType == typeof(DbConnection) ||
+                d.ServiceType == typeof(IAzureOpenAIClient) ||
+                d.ServiceType == typeof(IElevenLabsClient) ||
+                d.ServiceType == typeof(IGroqClient)).ToList();
             foreach (var d in descriptorsToRemove) services.Remove(d);
 
             _sqliteConnection = new SqliteConnection("DataSource=:memory:");
@@ -40,6 +49,10 @@ public sealed class MasterClassWebApplicationFactory : WebApplicationFactory<Pro
             services.AddSingleton(_sqliteConnection);
             services.AddDbContext<MasterClassDbContext>((sp, options) =>
                 options.UseSqlite(sp.GetRequiredService<DbConnection>()));
+
+            services.AddSingleton<IAzureOpenAIClient>(AzureFake);
+            services.AddSingleton<IElevenLabsClient>(ElevenFake);
+            services.AddSingleton<IGroqClient>(GroqFake);
         });
     }
 

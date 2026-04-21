@@ -1,4 +1,6 @@
 using MasterClass.Application.Abstractions;
+using MasterClass.Application.Ai;
+using MasterClass.Infrastructure.Ai;
 using MasterClass.Infrastructure.Auth;
 using MasterClass.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +22,13 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
         services.AddSingleton<IPasswordHasher, PbkdfPasswordHasher>();
+
+        services.Configure<AzureOpenAIOptions>(configuration.GetSection(AzureOpenAIOptions.SectionName));
+        services.Configure<ElevenLabsOptions>(configuration.GetSection(ElevenLabsOptions.SectionName));
+        services.Configure<GroqOptions>(configuration.GetSection(GroqOptions.SectionName));
+        services.AddHttpClient<IAzureOpenAIClient, AzureOpenAIClient>();
+        services.AddHttpClient<IElevenLabsClient, ElevenLabsClient>();
+        services.AddHttpClient<IGroqClient, GroqClient>();
 
         return services;
     }

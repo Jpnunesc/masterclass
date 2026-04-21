@@ -1,5 +1,7 @@
 using System.Text;
 using MasterClass.Api.Auth;
+using MasterClass.Api.Classroom;
+using MasterClass.Api.Endpoints;
 using MasterClass.Application;
 using MasterClass.Infrastructure;
 using MasterClass.Infrastructure.Auth;
@@ -74,11 +76,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseWebSockets();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).WithTags("System");
 app.MapAuthEndpoints();
+app.MapAssessmentEndpoints();
+app.MapLessonEndpoints();
+app.MapMaterialsEndpoints();
+app.MapTtsEndpoints();
+app.MapSttEndpoints();
+app.MapClassroomWebSocket();
 
 app.Run();
 
