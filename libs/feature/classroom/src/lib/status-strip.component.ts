@@ -9,8 +9,12 @@ import type { ConnectionState } from './classroom.types';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="mc-status-strip" role="status" aria-live="polite">
-      {{ i18n.t('classroom.transcript.system.reconnecting') }}
+    <div class="mc-status-strip" role="status" aria-live="polite" [attr.data-state]="connection()">
+      @switch (connection()) {
+        @case ('reconnecting') { {{ i18n.t('classroom.connection.reconnecting') }} }
+        @case ('offline')      { {{ i18n.t('classroom.connection.offline') }} }
+        @case ('ok')           { {{ i18n.t('classroom.connection.recovered') }} }
+      }
     </div>
   `,
   styles: [
