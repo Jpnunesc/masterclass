@@ -6,6 +6,7 @@ import { API_CONFIG } from '@shared/api';
 import { ClassroomSessionService } from '../classroom-session.service';
 import { ClassroomTransport } from './classroom-transport.service';
 import { ClassroomTransportBridge } from './classroom-transport.bridge';
+import { AudioPlaybackService } from './audio-playback.service';
 import { CLASSROOM_SOCKET_FACTORY, type ClassroomSocket } from './websocket-factory';
 import type { ClassroomEvent, ClassroomOutbound } from './classroom-protocol';
 
@@ -37,8 +38,32 @@ class FakeTransport {
   }
 }
 
+class FakePlayback {
+  readonly calls: string[] = [];
+  readonly pushed: ArrayBuffer[] = [];
+  lastContentType: string | undefined;
+  begin(contentType?: string): void {
+    this.calls.push('begin');
+    this.lastContentType = contentType;
+  }
+  push(chunk: ArrayBuffer): void {
+    this.calls.push('push');
+    this.pushed.push(chunk);
+  }
+  end(): void {
+    this.calls.push('end');
+  }
+  stop(): void {
+    this.calls.push('stop');
+  }
+  reset(): void {
+    this.calls.push('reset');
+  }
+}
+
 function build() {
   const transport = new FakeTransport();
+  const playback = new FakePlayback();
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
@@ -47,12 +72,13 @@ function build() {
         provide: CLASSROOM_SOCKET_FACTORY,
         useValue: (() => ({}) as unknown as ClassroomSocket)
       },
-      { provide: ClassroomTransport, useValue: transport }
+      { provide: ClassroomTransport, useValue: transport },
+      { provide: AudioPlaybackService, useValue: playback }
     ]
   });
   const bridge = TestBed.inject(ClassroomTransportBridge);
   const session = TestBed.inject(ClassroomSessionService);
-  return { bridge, session, transport };
+  return { bridge, session, transport, playback };
 }
 
 describe('ClassroomTransportBridge', () => {
@@ -159,7 +185,7 @@ describe('ClassroomTransportBridge', () => {
   });
 
   it('disconnect() unsubscribes, disconnects transport, and re-enables the simulator', () => {
-    const { bridge, session, transport } = build();
+    const { bridge, session, transport, playback } = build();
     bridge.connect({ level: 'B1', topic: 't', voiceId: 'v', locale: 'en' });
     transport.open = true;
     transport.events.next({ kind: 'connection', state: 'connected' });
@@ -167,5 +193,28 @@ describe('ClassroomTransportBridge', () => {
     expect(transport.disconnectCalls).toBe(1);
     expect(bridge.status()).toBe('idle');
     expect(session.simulatorEnabled()).toBeTrue();
+    expect(playback.calls.at(-1)).toBe('stop');
+  });
+
+  it('routes teacher audio lifecycle (begin / binary / end) into the playback service', () => {
+    const { bridge, transport, playback } = build();
+    bridge.connect({ level: 'B1', topic: 't', voiceId: 'v', locale: 'en' });
+    transport.open = true;
+    transport.events.next({ kind: 'connection', state: 'connected' });
+
+    transport.events.next({
+      kind: 'text',
+      message: { type: 'teacher.audio.begin', contentType: 'audio/mpeg' }
+    });
+    const chunk = new Uint8Array([1, 2, 3]).buffer;
+    transport.events.next({ kind: 'binary', data: chunk });
+    transport.events.next({
+      kind: 'text',
+      message: { type: 'teacher.audio.end' }
+    });
+
+    expect(playback.calls).toEqual(['begin', 'push', 'end']);
+    expect(playback.lastContentType).toBe('audio/mpeg');
+    expect(playback.pushed[0]).toBe(chunk);
   });
 });

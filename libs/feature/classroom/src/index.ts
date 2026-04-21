@@ -8,4 +8,6 @@ export * from './lib/transport/websocket-factory';
 export * from './lib/transport/classroom-transport.service';
 export * from './lib/transport/audio-capture-factory';
 export * from './lib/transport/audio-capture.service';
+export * from './lib/transport/audio-playback-factory';
+export * from './lib/transport/audio-playback.service';
 export * from './lib/transport/classroom-transport.bridge';

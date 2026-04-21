@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { ClassroomSessionService } from '../classroom-session.service';
+import { AudioPlaybackService } from './audio-playback.service';
 import { ClassroomTransport } from './classroom-transport.service';
 import type {
   ClassroomEvent,
@@ -23,6 +24,7 @@ export type BridgeStatus = 'idle' | 'connecting' | 'live' | 'closed' | 'error';
 export class ClassroomTransportBridge {
   private readonly transport = inject(ClassroomTransport);
   private readonly session = inject(ClassroomSessionService);
+  private readonly playback = inject(AudioPlaybackService);
 
   private readonly _status = signal<BridgeStatus>('idle');
   private subscription: Subscription | null = null;
@@ -63,7 +65,10 @@ export class ClassroomTransportBridge {
       this.subscription.unsubscribe();
       this.subscription = null;
     }
-    if (wasConnected) this.transport.disconnect();
+    if (wasConnected) {
+      this.transport.disconnect();
+      this.playback.stop();
+    }
     if (this._status() !== 'idle') this._status.set('idle');
     this.session.setSimulatorEnabled(true);
   }
@@ -84,8 +89,11 @@ export class ClassroomTransportBridge {
     }
     if (ev.kind === 'text') {
       this.routeInbound(ev.message);
+      return;
     }
-    // 'binary' frames belong to teacher-audio playback (next slice).
+    if (ev.kind === 'binary') {
+      this.playback.push(ev.data);
+    }
     // 'invalid' frames are dropped — server contract violation, not student-facing.
   }
 
@@ -109,7 +117,10 @@ export class ClassroomTransportBridge {
         for (const c of message.corrections) this.routeCorrection(c);
         return;
       case 'teacher.audio.begin':
+        this.playback.begin(message.contentType);
+        return;
       case 'teacher.audio.end':
+        this.playback.end();
         return;
       case 'session.reset.ok':
         return;
