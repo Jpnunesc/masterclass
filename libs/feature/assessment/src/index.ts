@@ -10,4 +10,8 @@ export * from './lib/clients/azure-openai.client';
 export * from './lib/clients/groq-stt.client';
 export * from './lib/clients/elevenlabs-tts.client';
 export * from './lib/clients/stub-clients';
+export * from './lib/clients/elevenlabs-tts.http';
+export * from './lib/clients/groq-stt.http';
+export * from './lib/clients/assessment.api';
+export * from './lib/clients/http-clients';
 export * from './lib/assessment.service';

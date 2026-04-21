@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { provideAssessmentStubs } from './clients/stub-clients';
+import { provideAssessmentHttpClients } from './clients/http-clients';
 
 export const ASSESSMENT_ROUTES: Routes = [
   {
     path: '',
-    providers: [provideAssessmentStubs()],
+    providers: [provideAssessmentHttpClients()],
     loadComponent: () =>
       import('./assessment.component').then((m) => m.AssessmentComponent)
   }

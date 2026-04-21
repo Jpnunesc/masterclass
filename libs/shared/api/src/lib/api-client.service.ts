@@ -35,6 +35,10 @@ export class ApiClient {
     return this.http.post<T>(this.url(path), form, options);
   }
 
+  postForBlob(path: string, body: unknown, options?: ApiRequestOptions): Observable<Blob> {
+    return this.http.post(this.url(path), body, { ...options, responseType: 'blob' });
+  }
+
   url(path: string): string {
     const base = this.config.baseUrl.replace(/\/+$/, '');
     const suffix = path.startsWith('/') ? path : `/${path}`;
