@@ -10,3 +10,4 @@ export * from './lib/correction/correction.types';
 export * from './lib/correction/pronunciation-loop';
 export * from './lib/clients/pronunciation-judge.client';
 export * from './lib/clients/stub-clients';
+export * from './lib/clients/lesson-turn.api';
