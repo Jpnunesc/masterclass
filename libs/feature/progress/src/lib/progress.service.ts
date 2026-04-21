@@ -1,8 +1,15 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import type { LevelAssessedEvent } from '@feature/assessment';
 import type { MaterialViewedEvent } from '@feature/materials';
 import { I18nService } from '@shared/i18n';
+import { ApiError } from '@shared/api';
+
+import { ProgressApi, type ProgressSnapshotResponse } from './clients/progress.api';
+import { CEFR_LEVELS, type CefrLevel } from '@feature/assessment';
+import { EMPTY_SKILLS, EMPTY_SUBSCORES } from './domain/progress.types';
+import type { StudentProgressSnapshot } from './domain/progress.types';
 
 import type { LessonCompletedEvent } from './domain/lesson-completed.event';
 import type { SkillPracticedEvent } from './domain/skill-practiced.event';
@@ -42,6 +49,7 @@ export class ProgressService {
   private readonly ai = inject(AZURE_OPENAI_GOALS);
   private readonly events = inject(PROGRESS_EVENT_SINK, { optional: true });
   private readonly i18n = inject(I18nService);
+  private readonly progressApi = inject(ProgressApi);
 
   private readonly stateSignal = signal<ProgressState>(INITIAL_PROGRESS_STATE);
   private readonly projectionSignal = signal<ProjectionState | null>(null);
@@ -88,6 +96,38 @@ export class ProgressService {
 
   ingestSkillPracticed(event: SkillPracticedEvent): void {
     this.apply((proj) => applySkillPracticed(proj, event), event.studentId);
+  }
+
+  /**
+   * Fetch the latest ProgressSnapshot from the backend and seed state.
+   * Returns true when a snapshot was applied, false when the server has no
+   * snapshot yet (404) so callers can fall back to the event-sourced
+   * projection without surfacing an error.
+   */
+  async loadFromServer(studentId?: string): Promise<boolean> {
+    this.stateSignal.update((s) => ({ ...s, phase: 'loading', error: null }));
+    try {
+      const response = await firstValueFrom(this.progressApi.me());
+      const snapshot = toSnapshot(response);
+      this.applyServerSnapshot(snapshot);
+      return true;
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'not_found') {
+        this.stateSignal.update((s) => ({
+          ...s,
+          phase: this.projectionSignal() ? 'ready' : 'idle',
+          error: null
+        }));
+        if (studentId && !this.projectionSignal()) this.start(studentId);
+        return false;
+      }
+      this.stateSignal.update((s) => ({
+        ...s,
+        phase: 'error',
+        error: err instanceof Error ? err.message : 'Failed to load progress'
+      }));
+      return false;
+    }
   }
 
   async refreshGoals(
@@ -150,6 +190,23 @@ export class ProgressService {
     this.emitProgressUpdated(next);
   }
 
+  private applyServerSnapshot(snapshot: StudentProgressSnapshot): void {
+    this.stateSignal.update((s) => ({
+      ...s,
+      phase: 'ready',
+      snapshot,
+      error: null
+    }));
+    if (!this.projectionSignal()) {
+      this.projectionSignal.set({
+        snapshot,
+        timeline: [],
+        milestones: [],
+        activityTimestamps: []
+      });
+    }
+  }
+
   private emitProgressUpdated(projection: ProjectionState): void {
     if (!this.events) return;
     const s = projection.snapshot;
@@ -176,4 +233,32 @@ function cap<T>(items: readonly T[], max: number): readonly T[] {
 
 function nowIso(): string {
   return new Date().toISOString();
+}
+
+function toSnapshot(response: ProgressSnapshotResponse): StudentProgressSnapshot {
+  return {
+    studentId: response.studentId,
+    level: toCefrLevel(response.level),
+    overallScore: clamp01(response.accuracyPercent / 100),
+    confidence: 0,
+    skills: EMPTY_SKILLS,
+    subScores: EMPTY_SUBSCORES,
+    lessonsCompleted: response.lessonsCompleted,
+    materialsViewed: 0,
+    streakDays: 0,
+    longestStreakDays: 0,
+    lastActivityAt: null,
+    updatedAt: response.capturedAt
+  };
+}
+
+function toCefrLevel(value: string): CefrLevel {
+  return (CEFR_LEVELS as readonly string[]).includes(value)
+    ? (value as CefrLevel)
+    : 'A1';
+}
+
+function clamp01(n: number): number {
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
 }

@@ -1,8 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { I18nService } from '@shared/i18n';
 import { expectNoAxeViolations, runAxe } from '@shared/a11y/testing';
+import { API_CONFIG } from '@shared/api';
 import { provideMaterialsForTesting } from '@feature/materials';
 
 import { ProgressComponent } from './progress.component';
@@ -22,6 +25,9 @@ describe('ProgressComponent (SEV-20)', () => {
       imports: [ProgressComponent],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_CONFIG, useValue: { baseUrl: 'http://test.api' } },
         ...provideProgress(),
         ...provideMaterialsForTesting()
       ]

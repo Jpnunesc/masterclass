@@ -11,3 +11,4 @@ export * from './lib/pipeline/projections';
 export * from './lib/pipeline/streak';
 export * from './lib/clients/azure-openai-goals.client';
 export * from './lib/clients/stub-goals.client';
+export * from './lib/clients/progress.api';

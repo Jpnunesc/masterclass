@@ -1,4 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
+import { API_CONFIG } from '@shared/api';
 
 import {
   LEVEL_ASSESSED_SCHEMA_VERSION,
@@ -58,7 +62,14 @@ const lesson: LessonCompletedEvent = {
 
 describe('ProgressService (contract)', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [...provideProgress()] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_CONFIG, useValue: { baseUrl: 'http://test.api' } },
+        ...provideProgress()
+      ]
+    });
   });
 
   it('starts idempotently and exposes an initial snapshot', () => {
