@@ -11,11 +11,15 @@ import {
 import { Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 
+import { firstValueFrom } from 'rxjs';
+
 import { I18nService, type I18nKey } from '@shared/i18n';
 import { LanguageSelectorComponent } from '@shared/ui';
 import { LIVE_ANNOUNCER } from '@shared/a11y';
+import { ApiError } from '@shared/api';
 
 import { LearnerSessionService } from './impersonate-learner.guard';
+import { AuthService, type AuthResponse } from './auth.service';
 
 type AuthMode = 'login' | 'signup';
 
@@ -248,6 +252,7 @@ export class AuthComponent {
   protected readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly session = inject(LearnerSessionService);
+  private readonly auth = inject(AuthService);
   private readonly announcer = inject(LIVE_ANNOUNCER, { optional: true });
 
   protected readonly mark = 'M';
@@ -376,11 +381,11 @@ export class AuthComponent {
     this.loading.set(true);
     const started = Date.now();
     try {
-      await this.submit();
+      const response = await this.submit();
       this.session.setIdentity({
-        userId: this.email().trim(),
-        displayName: this.isSignup() ? this.name().trim() : null,
-        email: this.email().trim(),
+        userId: response.studentId,
+        displayName: response.displayName,
+        email: response.email,
         impersonated: false
       });
       await this.drain(started);
@@ -405,18 +410,22 @@ export class AuthComponent {
     if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
   }
 
-  private async submit(): Promise<void> {
-    // v1.0 stub — no backend yet. Pretend a brief round-trip so the spinner is
-    // visible and the success path exercises the loading contract.
-    await new Promise((r) => setTimeout(r, 50));
+  private submit(): Promise<AuthResponse> {
+    const email = this.email().trim();
+    const password = this.password();
+    if (this.isSignup()) {
+      return firstValueFrom(
+        this.auth.register({ email, password, displayName: this.name().trim() })
+      );
+    }
+    return firstValueFrom(this.auth.login({ email, password }));
   }
 
   private classifyError(err: unknown): I18nKey {
-    if (err && typeof err === 'object' && 'code' in err) {
-      const code = (err as { code: string }).code;
-      if (code === 'invalid-credentials') return 'auth.error.loginInvalid';
-      if (code === 'email-conflict') return 'auth.error.signupConflict';
-      if (code === 'network') return 'auth.error.network';
+    if (err instanceof ApiError) {
+      if (err.kind === 'network') return 'auth.error.network';
+      if (this.isSignup() && err.kind === 'bad_request') return 'auth.error.signupConflict';
+      if (!this.isSignup() && err.kind === 'unauthorized') return 'auth.error.loginInvalid';
     }
     return 'auth.error.unknown';
   }

@@ -1,10 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { I18nService } from '@shared/i18n';
 import { expectNoAxeViolations, runAxe } from '@shared/a11y/testing';
+import { API_CONFIG } from '@shared/api';
 
 import { AuthComponent } from './auth.component';
+
+const TEST_API = 'http://test.api';
 
 function mount() {
   const fixture = TestBed.createComponent(AuthComponent);
@@ -16,9 +21,15 @@ function mount() {
 describe('AuthComponent', () => {
   beforeEach(async () => {
     localStorage.removeItem('mc.locale');
+    sessionStorage.removeItem('mc.auth.access');
     await TestBed.configureTestingModule({
       imports: [AuthComponent],
-      providers: [provideRouter([{ path: 'onboarding', children: [] }, { path: 'classroom', children: [] }])]
+      providers: [
+        provideRouter([{ path: 'onboarding', children: [] }, { path: 'classroom', children: [] }]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_CONFIG, useValue: { baseUrl: TEST_API } }
+      ]
     }).compileComponents();
     TestBed.inject(I18nService).setLocale('en');
   });
@@ -95,11 +106,24 @@ describe('AuthComponent', () => {
     fixture.detectChanges();
     const router = TestBed.inject(Router);
     const nav = spyOn(router, 'navigateByUrl').and.callThrough();
+    const http = TestBed.inject(HttpTestingController);
     const form = el.querySelector<HTMLFormElement>('form')!;
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const req = http.expectOne(`${TEST_API}/auth/register`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'a@b.co', password: 'hunter22', displayName: 'Alex' });
+    req.flush({
+      studentId: '11111111-1111-1111-1111-111111111111',
+      email: 'a@b.co',
+      displayName: 'Alex',
+      accessToken: 'jwt.here',
+      expiresAt: new Date(Date.now() + 3600_000).toISOString()
+    });
     await new Promise((r) => setTimeout(r, 500));
     await fixture.whenStable();
     expect(nav).toHaveBeenCalledWith('/onboarding');
+    expect(sessionStorage.getItem('mc.auth.access')).toBe('jwt.here');
+    http.verify();
   });
 
   it('produces no axe violations in login mode', async () => {
