@@ -5,7 +5,7 @@ import { I18nService } from '@shared/i18n';
 import { expectNoAxeViolations, runAxe } from '@shared/a11y/testing';
 
 import { LibraryComponent } from './library.component';
-import { provideMaterials } from './providers';
+import { provideMaterialsForTesting } from './providers';
 
 function mount() {
   const fixture = TestBed.createComponent(LibraryComponent);
@@ -19,7 +19,7 @@ describe('axe — Materials Library (SEV-31)', () => {
     localStorage.removeItem('mc.locale');
     await TestBed.configureTestingModule({
       imports: [LibraryComponent],
-      providers: [provideRouter([]), provideLiveAnnouncer(), ...provideMaterials()]
+      providers: [provideRouter([]), provideLiveAnnouncer(), ...provideMaterialsForTesting()]
     }).compileComponents();
   });
 

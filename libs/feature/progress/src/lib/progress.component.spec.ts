@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 
 import { I18nService } from '@shared/i18n';
 import { expectNoAxeViolations, runAxe } from '@shared/a11y/testing';
-import { provideMaterials } from '@feature/materials';
+import { provideMaterialsForTesting } from '@feature/materials';
 
 import { ProgressComponent } from './progress.component';
 import { provideProgress } from './providers';
@@ -23,7 +23,7 @@ describe('ProgressComponent (SEV-20)', () => {
       providers: [
         provideRouter([]),
         ...provideProgress(),
-        ...provideMaterials()
+        ...provideMaterialsForTesting()
       ]
     }).compileComponents();
     TestBed.inject(I18nService).setLocale('en');

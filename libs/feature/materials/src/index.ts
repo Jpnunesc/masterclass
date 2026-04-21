@@ -18,4 +18,6 @@ export * from './lib/pipeline/demo-lesson-review';
 export * from './lib/ui/lesson-row.component';
 export * from './lib/clients/azure-openai-content.client';
 export * from './lib/clients/stub-content.client';
+export * from './lib/clients/azure-openai-content.http';
+export * from './lib/clients/http-content.client';
 export * from './lib/events/material-events';

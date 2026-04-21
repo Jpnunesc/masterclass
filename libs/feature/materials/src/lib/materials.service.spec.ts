@@ -3,12 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { isMaterialGeneratedEvent } from './domain/material-generated.event';
 import { isMaterialViewedEvent } from './domain/material-viewed.event';
 import { MaterialsService } from './materials.service';
-import { provideMaterials } from './providers';
+import { provideMaterialsForTesting } from './providers';
 import { MATERIAL_EVENT_SINK, InMemoryMaterialEventSink } from './events/material-events';
 
 describe('MaterialsService (contract)', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [...provideMaterials()] });
+    TestBed.configureTestingModule({ providers: [...provideMaterialsForTesting()] });
   });
 
   it('generates a deterministic material and emits MaterialGenerated', async () => {
