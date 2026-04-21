@@ -236,6 +236,7 @@
   "materials.empty.lesson": "Nenhuma aula corresponde. Afrouxe os filtros ou gere uma nova.",
   "materials.empty.vocabulary": "Nenhum baralho de vocabulário corresponde. Gere um para começar.",
   "materials.empty.exercise": "Nenhum exercício corresponde. Gere um para praticar.",
+  "materials.exercise.preview_notice": "Versão preliminar — perguntas completas chegam na próxima atualização.",
   "materials.empty.summary": "Nenhum resumo ainda. Eles aparecem aqui após cada aula.",
   "materials.generate.announced": "Novo material pronto.",
   "materials.eyebrow": "BIBLIOTECA",

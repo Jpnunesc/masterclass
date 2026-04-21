@@ -236,6 +236,7 @@
   "materials.empty.lesson": "No lessons match yet. Try relaxing the filters or generate a new one.",
   "materials.empty.vocabulary": "No vocabulary decks match yet. Generate one to get started.",
   "materials.empty.exercise": "No exercises match yet. Generate one to practice.",
+  "materials.exercise.preview_notice": "Preview version — full multiple-choice questions arrive in the next release.",
   "materials.empty.summary": "No summaries match yet. They appear here after each class.",
   "materials.generate.announced": "New material ready.",
   "materials.eyebrow": "LIBRARY",

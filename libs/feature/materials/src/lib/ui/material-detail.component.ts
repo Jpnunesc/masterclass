@@ -6,7 +6,7 @@ import {
   Output
 } from '@angular/core';
 
-import type { Material } from '../domain/material.types';
+import type { ExerciseQuestion, Material } from '../domain/material.types';
 
 /**
  * Accessible modal-ish panel that renders the full body of the selected
@@ -62,6 +62,11 @@ import type { Material } from '../domain/material.types';
           </dl>
         }
         @case ('exercise') {
+          @if (hasDegradedExercise(material.body.questions)) {
+            <p class="mc-material-exercise-preview">
+              {{ previewNoticeLabel }}
+            </p>
+          }
           <ol class="mc-material-exercises">
             @for (q of material.body.questions; track q.prompt; let i = $index) {
               <li class="mc-material-question">
@@ -156,6 +161,15 @@ import type { Material } from '../domain/material.types';
         font-size: var(--mc-fs-body-sm);
         font-style: italic;
       }
+      .mc-material-exercise-preview {
+        margin: 0 0 var(--mc-gap-stack);
+        padding: var(--mc-space-3);
+        border-radius: var(--mc-radius-md);
+        background: var(--mc-bg-inset);
+        color: var(--mc-ink-muted);
+        font-size: var(--mc-fs-body-sm);
+        font-style: italic;
+      }
       .mc-material-exercises {
         display: grid;
         gap: var(--mc-gap-stack);
@@ -206,6 +220,11 @@ export class MaterialDetailComponent {
   @Input({ required: true }) material!: Material;
   @Input({ required: true }) kindLabel!: string;
   @Input({ required: true }) closeLabel!: string;
+  @Input({ required: true }) previewNoticeLabel!: string;
 
   @Output() closed = new EventEmitter<void>();
+
+  protected hasDegradedExercise(questions: readonly ExerciseQuestion[]): boolean {
+    return questions.some((q) => q.choices.length <= 2);
+  }
 }
