@@ -6,3 +6,5 @@ export * from './lib/classroom.types';
 export * from './lib/transport/classroom-protocol';
 export * from './lib/transport/websocket-factory';
 export * from './lib/transport/classroom-transport.service';
+export * from './lib/transport/audio-capture-factory';
+export * from './lib/transport/audio-capture.service';
