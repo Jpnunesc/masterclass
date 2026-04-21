@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using MasterClass.Application.Abstractions;
 using MasterClass.Domain.Entities;
@@ -10,6 +11,8 @@ namespace MasterClass.Infrastructure.Auth;
 
 public sealed class JwtTokenIssuer : ITokenIssuer
 {
+    private const int RefreshTokenByteLength = 48;
+
     private readonly JwtOptions _options;
 
     public JwtTokenIssuer(IOptions<JwtOptions> options)
@@ -45,5 +48,20 @@ public sealed class JwtTokenIssuer : ITokenIssuer
 
         var encoded = new JwtSecurityTokenHandler().WriteToken(token);
         return new IssuedToken(encoded, expires);
+    }
+
+    public IssuedRefreshToken IssueRefresh()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(RefreshTokenByteLength);
+        var opaque = Base64UrlEncoder.Encode(bytes);
+        var expires = DateTimeOffset.UtcNow.AddDays(_options.RefreshTokenExpirationDays);
+        return new IssuedRefreshToken(opaque, expires);
+    }
+
+    public string HashRefreshToken(string opaqueToken)
+    {
+        if (string.IsNullOrWhiteSpace(opaqueToken)) throw new ArgumentException("Opaque refresh token is required.", nameof(opaqueToken));
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(opaqueToken));
+        return Convert.ToHexString(hash);
     }
 }

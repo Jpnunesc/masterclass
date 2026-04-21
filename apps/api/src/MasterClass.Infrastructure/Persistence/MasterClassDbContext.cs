@@ -14,6 +14,7 @@ public class MasterClassDbContext : DbContext, IMasterClassDbContext
     public DbSet<VocabularyItem> VocabularyItems => Set<VocabularyItem>();
     public DbSet<ProgressSnapshot> ProgressSnapshots => Set<ProgressSnapshot>();
     public DbSet<ReviewItem> ReviewItems => Set<ReviewItem>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

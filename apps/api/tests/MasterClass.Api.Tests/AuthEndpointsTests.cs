@@ -74,6 +74,65 @@ public class AuthEndpointsTests : IClassFixture<MasterClassWebApplicationFactory
     }
 
     [Fact]
+    public async Task Refresh_RoundTrip_RotatesTokenAndRejectsReuse()
+    {
+        var client = _factory.CreateClient();
+        var email = $"user-{Guid.NewGuid():N}@example.com";
+
+        var registerResp = await client.PostAsJsonAsync("/auth/register",
+            new RegisterRequest(email, "password123", "Refresher"));
+        Assert.Equal(HttpStatusCode.OK, registerResp.StatusCode);
+        var registered = await registerResp.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(registered);
+        Assert.False(string.IsNullOrWhiteSpace(registered!.RefreshToken));
+
+        var refresh1Resp = await client.PostAsJsonAsync("/auth/refresh",
+            new RefreshRequest(registered.RefreshToken));
+        Assert.Equal(HttpStatusCode.OK, refresh1Resp.StatusCode);
+        var refreshed1 = await refresh1Resp.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(refreshed1);
+        Assert.NotEqual(registered.RefreshToken, refreshed1!.RefreshToken);
+        Assert.False(string.IsNullOrWhiteSpace(refreshed1.AccessToken));
+
+        var refresh2Resp = await client.PostAsJsonAsync("/auth/refresh",
+            new RefreshRequest(refreshed1.RefreshToken));
+        Assert.Equal(HttpStatusCode.OK, refresh2Resp.StatusCode);
+
+        var reuseResp = await client.PostAsJsonAsync("/auth/refresh",
+            new RefreshRequest(registered.RefreshToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, reuseResp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Refresh_UnknownToken_Returns401()
+    {
+        var client = _factory.CreateClient();
+        var resp = await client.PostAsJsonAsync("/auth/refresh",
+            new RefreshRequest("bogus-refresh-token"));
+        Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Logout_RevokesRefreshToken()
+    {
+        var client = _factory.CreateClient();
+        var email = $"user-{Guid.NewGuid():N}@example.com";
+
+        var registerResp = await client.PostAsJsonAsync("/auth/register",
+            new RegisterRequest(email, "password123", "LogoutUser"));
+        var registered = await registerResp.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(registered);
+
+        var logoutResp = await client.PostAsJsonAsync("/auth/logout",
+            new RefreshRequest(registered!.RefreshToken));
+        Assert.Equal(HttpStatusCode.NoContent, logoutResp.StatusCode);
+
+        var refreshResp = await client.PostAsJsonAsync("/auth/refresh",
+            new RefreshRequest(registered.RefreshToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, refreshResp.StatusCode);
+    }
+
+    [Fact]
     public async Task Health_ReturnsOk()
     {
         var client = _factory.CreateClient();

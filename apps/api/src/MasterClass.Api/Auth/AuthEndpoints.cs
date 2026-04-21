@@ -45,6 +45,31 @@ public static class AuthEndpoints
             }
         });
 
+        group.MapPost("/refresh", async (
+            [FromBody] RefreshRequest request,
+            AuthService svc,
+            CancellationToken ct) =>
+        {
+            try
+            {
+                var response = await svc.RefreshAsync(request, ct);
+                return Results.Ok(response);
+            }
+            catch (AuthException)
+            {
+                return Results.Unauthorized();
+            }
+        });
+
+        group.MapPost("/logout", async (
+            [FromBody] RefreshRequest request,
+            AuthService svc,
+            CancellationToken ct) =>
+        {
+            await svc.LogoutAsync(request, ct);
+            return Results.NoContent();
+        });
+
         group.MapGet("/me", async (
             ClaimsPrincipal user,
             AuthService svc,

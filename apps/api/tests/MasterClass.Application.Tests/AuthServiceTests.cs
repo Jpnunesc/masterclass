@@ -20,6 +20,7 @@ public class AuthServiceTests
         public DbSet<VocabularyItem> VocabularyItems => Set<VocabularyItem>();
         public DbSet<ProgressSnapshot> ProgressSnapshots => Set<ProgressSnapshot>();
         public DbSet<ReviewItem> ReviewItems => Set<ReviewItem>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     }
 
     private sealed class PlainHasher : IPasswordHasher
@@ -30,14 +31,30 @@ public class AuthServiceTests
 
     private sealed class StubIssuer : ITokenIssuer
     {
+        private int _refreshSeq;
+
+        public DateTimeOffset RefreshExpiresAt { get; set; } = DateTimeOffset.UtcNow.AddDays(7);
+
         public IssuedToken Issue(Student student) =>
             new($"token-for-{student.Id}", DateTimeOffset.UtcNow.AddHours(1));
+
+        public IssuedRefreshToken IssueRefresh() =>
+            new($"refresh-{System.Threading.Interlocked.Increment(ref _refreshSeq)}-{Guid.NewGuid():N}", RefreshExpiresAt);
+
+        public string HashRefreshToken(string opaqueToken) => $"hash::{opaqueToken}";
+    }
+
+    private static AuthService CreateService(out FakeDbContext db, out StubIssuer issuer)
+    {
+        db = new FakeDbContext();
+        issuer = new StubIssuer();
+        return new AuthService(db, new PlainHasher(), issuer);
     }
 
     private static AuthService CreateService(out FakeDbContext db)
     {
-        db = new FakeDbContext();
-        return new AuthService(db, new PlainHasher(), new StubIssuer());
+        var svc = CreateService(out db, out _);
+        return svc;
     }
 
     [Fact]
@@ -50,7 +67,9 @@ public class AuthServiceTests
         Assert.NotEqual(Guid.Empty, res.StudentId);
         Assert.Equal("user@example.com", res.Email);
         Assert.StartsWith("token-for-", res.AccessToken);
+        Assert.False(string.IsNullOrWhiteSpace(res.RefreshToken));
         Assert.Single(db.Students);
+        Assert.Single(db.RefreshTokens);
     }
 
     [Fact]
@@ -80,6 +99,7 @@ public class AuthServiceTests
         var res = await svc.LoginAsync(new LoginRequest("login@example.com", "password123"));
 
         Assert.Equal("login@example.com", res.Email);
+        Assert.False(string.IsNullOrWhiteSpace(res.RefreshToken));
     }
 
     [Fact]
@@ -90,5 +110,73 @@ public class AuthServiceTests
 
         await Assert.ThrowsAsync<AuthException>(() =>
             svc.LoginAsync(new LoginRequest("bad@example.com", "wrong-pass")));
+    }
+
+    [Fact]
+    public async Task Refresh_ValidToken_RotatesAndRevokesOld()
+    {
+        var svc = CreateService(out var db);
+        var first = await svc.RegisterAsync(new RegisterRequest("rot@example.com", "password123", "Rot"));
+
+        var second = await svc.RefreshAsync(new RefreshRequest(first.RefreshToken));
+
+        Assert.NotEqual(first.RefreshToken, second.RefreshToken);
+        Assert.Equal(2, db.RefreshTokens.Count());
+        var revoked = db.RefreshTokens.Single(t => t.TokenHash == $"hash::{first.RefreshToken}");
+        Assert.NotNull(revoked.RevokedAt);
+    }
+
+    [Fact]
+    public async Task Refresh_ReusedToken_Throws()
+    {
+        var svc = CreateService(out _);
+        var first = await svc.RegisterAsync(new RegisterRequest("reuse@example.com", "password123", "Reuse"));
+
+        await svc.RefreshAsync(new RefreshRequest(first.RefreshToken));
+        await Assert.ThrowsAsync<AuthException>(() =>
+            svc.RefreshAsync(new RefreshRequest(first.RefreshToken)));
+    }
+
+    [Fact]
+    public async Task Refresh_UnknownToken_Throws()
+    {
+        var svc = CreateService(out _);
+        await svc.RegisterAsync(new RegisterRequest("unknown@example.com", "password123", "Unknown"));
+
+        await Assert.ThrowsAsync<AuthException>(() =>
+            svc.RefreshAsync(new RefreshRequest("not-a-real-token")));
+    }
+
+    [Fact]
+    public async Task Refresh_EmptyToken_Throws()
+    {
+        var svc = CreateService(out _);
+        await Assert.ThrowsAsync<AuthException>(() =>
+            svc.RefreshAsync(new RefreshRequest("")));
+    }
+
+    [Fact]
+    public async Task Refresh_ExpiredToken_Throws()
+    {
+        var svc = CreateService(out _, out var issuer);
+        issuer.RefreshExpiresAt = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var first = await svc.RegisterAsync(new RegisterRequest("expired@example.com", "password123", "Expired"));
+
+        await Assert.ThrowsAsync<AuthException>(() =>
+            svc.RefreshAsync(new RefreshRequest(first.RefreshToken)));
+    }
+
+    [Fact]
+    public async Task Logout_RevokesToken()
+    {
+        var svc = CreateService(out var db);
+        var first = await svc.RegisterAsync(new RegisterRequest("logout@example.com", "password123", "Logout"));
+
+        await svc.LogoutAsync(new RefreshRequest(first.RefreshToken));
+
+        var stored = db.RefreshTokens.Single();
+        Assert.NotNull(stored.RevokedAt);
+        await Assert.ThrowsAsync<AuthException>(() =>
+            svc.RefreshAsync(new RefreshRequest(first.RefreshToken)));
     }
 }
