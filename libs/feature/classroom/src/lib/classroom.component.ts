@@ -18,6 +18,7 @@ import { ChatColumnComponent } from './chat-column.component';
 import { ClassroomChromeService } from './classroom-chrome.service';
 import { ClassroomSessionService } from './classroom-session.service';
 import { ClassroomStatusStripComponent } from './status-strip.component';
+import { ClassroomTransportBridge } from './transport/classroom-transport.bridge';
 import { WhiteboardColumnComponent } from './whiteboard-column.component';
 
 @Component({
@@ -328,6 +329,7 @@ export class ClassroomComponent implements OnInit, OnDestroy {
   protected readonly i18n = inject(I18nService);
   protected readonly session = inject(ClassroomSessionService);
   private readonly chrome = inject(ClassroomChromeService);
+  private readonly bridge = inject(ClassroomTransportBridge);
   private readonly route = inject(ActivatedRoute);
 
   protected readonly chatInputOpen = signal(false);
@@ -361,6 +363,18 @@ export class ClassroomComponent implements OnInit, OnDestroy {
       },
       { allowSignalWrites: true }
     );
+
+    effect(
+      () => {
+        const mic = this.session.micState();
+        if (mic === 'recording' && !this.bridge.utteranceActive()) {
+          this.bridge.startUtterance('webm');
+        } else if (mic !== 'recording' && this.bridge.utteranceActive()) {
+          this.bridge.endUtterance();
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
 
   @HostListener('window:resize')
@@ -372,10 +386,18 @@ export class ClassroomComponent implements OnInit, OnDestroy {
     const sessionId = this.route.snapshot.paramMap.get('sessionId') ?? 'demo';
     this.session.loadSession(sessionId);
     this.chrome.setActive(this.session.lesson());
+    const lesson = this.session.lesson();
+    this.bridge.connect({
+      level: lesson.level,
+      topic: this.i18n.t(lesson.titleKey),
+      voiceId: '',
+      locale: this.i18n.locale()
+    });
   }
 
   ngOnDestroy(): void {
     this.chrome.clear();
+    this.bridge.disconnect();
   }
 
   onMicToggle(): void {

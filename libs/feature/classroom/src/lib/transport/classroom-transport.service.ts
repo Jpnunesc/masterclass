@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { EMPTY, Observable, Subject } from 'rxjs';
 
 import { API_CONFIG } from '@shared/api';
 
@@ -48,7 +48,7 @@ function parseText(raw: string): ClassroomInbound | null {
 
 @Injectable({ providedIn: 'root' })
 export class ClassroomTransport {
-  private readonly config = inject(API_CONFIG);
+  private readonly config = inject(API_CONFIG, { optional: true });
   private readonly factory = inject(CLASSROOM_SOCKET_FACTORY);
 
   private readonly _state = signal<ClassroomConnectionState>('disconnected');
@@ -59,6 +59,7 @@ export class ClassroomTransport {
 
   connect(params: ConnectParams): Observable<ClassroomEvent> {
     this.disconnect();
+    if (!this.config) return EMPTY;
 
     const subject = new Subject<ClassroomEvent>();
     this.events$ = subject;
