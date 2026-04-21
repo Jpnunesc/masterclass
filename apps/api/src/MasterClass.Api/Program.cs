@@ -84,6 +84,8 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" })).WithTags("System"
 app.MapAuthEndpoints();
 app.MapAssessmentEndpoints();
 app.MapLessonEndpoints();
+app.MapLessonsEndpoints();
+app.MapProgressEndpoints();
 app.MapMaterialsEndpoints();
 app.MapTtsEndpoints();
 app.MapSttEndpoints();
