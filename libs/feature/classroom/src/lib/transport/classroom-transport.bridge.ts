@@ -2,9 +2,11 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { ClassroomSessionService } from '../classroom-session.service';
+import { AudioCaptureService } from './audio-capture.service';
 import { AudioPlaybackService } from './audio-playback.service';
 import { ClassroomTransport } from './classroom-transport.service';
 import type {
+  ClassroomAudioFormat,
   ClassroomEvent,
   ClassroomInbound,
   ConnectParams,
@@ -25,11 +27,15 @@ export class ClassroomTransportBridge {
   private readonly transport = inject(ClassroomTransport);
   private readonly session = inject(ClassroomSessionService);
   private readonly playback = inject(AudioPlaybackService);
+  private readonly capture = inject(AudioCaptureService);
 
   private readonly _status = signal<BridgeStatus>('idle');
+  private readonly _utterance = signal<boolean>(false);
   private subscription: Subscription | null = null;
+  private captureSubscription: Subscription | null = null;
 
   readonly status = this._status.asReadonly();
+  readonly utteranceActive = this._utterance.asReadonly();
 
   connect(params: ConnectParams): void {
     this.disconnect();
@@ -51,6 +57,36 @@ export class ClassroomTransportBridge {
     return this.transport.sendControl({ type: 'student.text', text: trimmed });
   }
 
+  /**
+   * Begin a microphone-driven student turn. Sends `student.utterance.begin`
+   * with the chosen audioFormat, then forwards each MediaRecorder chunk as
+   * a binary frame via the transport. The utterance ends via endUtterance()
+   * (mic off) or transparently when the capture stream errors out.
+   */
+  startUtterance(format: ClassroomAudioFormat = 'webm'): boolean {
+    if (this.captureSubscription) return false;
+    if (!this.transport.sendControl({ type: 'student.utterance.begin', audioFormat: format })) {
+      return false;
+    }
+    this._utterance.set(true);
+    this.captureSubscription = this.capture
+      .start({ timesliceMs: 250 })
+      .subscribe({
+        next: (blob) => {
+          this.transport.sendAudioChunk(blob);
+        },
+        error: () => this.finishUtterance(),
+        complete: () => this.finishUtterance()
+      });
+    return true;
+  }
+
+  endUtterance(): void {
+    if (!this.captureSubscription) return;
+    this.capture.stop();
+    // capture's 'complete' callback drives finishUtterance — single source
+  }
+
   sendLocaleChange(locale: string): boolean {
     return this.transport.sendControl({ type: 'locale.set', locale });
   }
@@ -65,12 +101,27 @@ export class ClassroomTransportBridge {
       this.subscription.unsubscribe();
       this.subscription = null;
     }
+    if (this.captureSubscription) {
+      const sub = this.captureSubscription;
+      this.captureSubscription = null;
+      this._utterance.set(false);
+      sub.unsubscribe();
+      this.capture.stop();
+    }
     if (wasConnected) {
       this.transport.disconnect();
       this.playback.stop();
     }
     if (this._status() !== 'idle') this._status.set('idle');
     this.session.setSimulatorEnabled(true);
+  }
+
+  private finishUtterance(): void {
+    if (!this.captureSubscription) return;
+    this.captureSubscription.unsubscribe();
+    this.captureSubscription = null;
+    this._utterance.set(false);
+    this.transport.sendControl({ type: 'student.utterance.end' });
   }
 
   private route(ev: ClassroomEvent): void {

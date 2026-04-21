@@ -7,12 +7,14 @@ import { ClassroomSessionService } from '../classroom-session.service';
 import { ClassroomTransport } from './classroom-transport.service';
 import { ClassroomTransportBridge } from './classroom-transport.bridge';
 import { AudioPlaybackService } from './audio-playback.service';
+import { AudioCaptureService } from './audio-capture.service';
 import { CLASSROOM_SOCKET_FACTORY, type ClassroomSocket } from './websocket-factory';
 import type { ClassroomEvent, ClassroomOutbound } from './classroom-protocol';
 
 class FakeTransport {
   readonly events = new Subject<ClassroomEvent>();
   readonly sentControl: ClassroomOutbound[] = [];
+  readonly sentAudio: unknown[] = [];
   connectCalls = 0;
   disconnectCalls = 0;
   open = false;
@@ -28,8 +30,10 @@ class FakeTransport {
     return true;
   }
 
-  sendAudioChunk(): boolean {
-    return this.open;
+  sendAudioChunk(chunk: unknown): boolean {
+    if (!this.open) return false;
+    this.sentAudio.push(chunk);
+    return true;
   }
 
   disconnect(): void {
@@ -61,9 +65,25 @@ class FakePlayback {
   }
 }
 
+class FakeCapture {
+  readonly chunks$ = new Subject<Blob>();
+  readonly calls: string[] = [];
+  startOptions: { mimeType?: string; timesliceMs?: number } | null = null;
+  start(opts: { mimeType?: string; timesliceMs?: number } = {}) {
+    this.calls.push('start');
+    this.startOptions = opts;
+    return this.chunks$.asObservable();
+  }
+  stop(): void {
+    this.calls.push('stop');
+    this.chunks$.complete();
+  }
+}
+
 function build() {
   const transport = new FakeTransport();
   const playback = new FakePlayback();
+  const capture = new FakeCapture();
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
@@ -73,12 +93,13 @@ function build() {
         useValue: (() => ({}) as unknown as ClassroomSocket)
       },
       { provide: ClassroomTransport, useValue: transport },
-      { provide: AudioPlaybackService, useValue: playback }
+      { provide: AudioPlaybackService, useValue: playback },
+      { provide: AudioCaptureService, useValue: capture as unknown as AudioCaptureService }
     ]
   });
   const bridge = TestBed.inject(ClassroomTransportBridge);
   const session = TestBed.inject(ClassroomSessionService);
-  return { bridge, session, transport, playback };
+  return { bridge, session, transport, playback, capture };
 }
 
 describe('ClassroomTransportBridge', () => {
@@ -194,6 +215,65 @@ describe('ClassroomTransportBridge', () => {
     expect(bridge.status()).toBe('idle');
     expect(session.simulatorEnabled()).toBeTrue();
     expect(playback.calls.at(-1)).toBe('stop');
+  });
+
+  it('startUtterance posts begin, forwards capture chunks, then endUtterance posts end', () => {
+    const { bridge, transport, capture } = build();
+    bridge.connect({ level: 'B1', topic: 't', voiceId: 'v', locale: 'en' });
+    transport.open = true;
+    transport.events.next({ kind: 'connection', state: 'connected' });
+
+    expect(bridge.startUtterance('webm')).toBeTrue();
+    expect(bridge.utteranceActive()).toBeTrue();
+    expect(transport.sentControl).toContain({
+      type: 'student.utterance.begin',
+      audioFormat: 'webm'
+    });
+    expect(capture.calls).toContain('start');
+    expect(capture.startOptions?.timesliceMs).toBe(250);
+
+    const blob1 = new Blob([new Uint8Array([1, 2])]);
+    const blob2 = new Blob([new Uint8Array([3, 4])]);
+    capture.chunks$.next(blob1);
+    capture.chunks$.next(blob2);
+    expect(transport.sentAudio).toEqual([blob1, blob2]);
+
+    bridge.endUtterance();
+    expect(capture.calls.at(-1)).toBe('stop');
+    expect(transport.sentControl.at(-1)).toEqual({ type: 'student.utterance.end' });
+    expect(bridge.utteranceActive()).toBeFalse();
+  });
+
+  it('startUtterance is rejected while another utterance is in flight', () => {
+    const { bridge, transport } = build();
+    bridge.connect({ level: 'B1', topic: 't', voiceId: 'v', locale: 'en' });
+    transport.open = true;
+    transport.events.next({ kind: 'connection', state: 'connected' });
+    expect(bridge.startUtterance()).toBeTrue();
+    expect(bridge.startUtterance()).toBeFalse();
+  });
+
+  it('disconnect() while utterance is active stops capture and clears the flag', () => {
+    const { bridge, transport, capture } = build();
+    bridge.connect({ level: 'B1', topic: 't', voiceId: 'v', locale: 'en' });
+    transport.open = true;
+    transport.events.next({ kind: 'connection', state: 'connected' });
+    bridge.startUtterance();
+    expect(bridge.utteranceActive()).toBeTrue();
+    bridge.disconnect();
+    expect(capture.calls).toContain('stop');
+    expect(bridge.utteranceActive()).toBeFalse();
+  });
+
+  it('capture error during utterance posts utterance.end and clears flag', () => {
+    const { bridge, transport, capture } = build();
+    bridge.connect({ level: 'B1', topic: 't', voiceId: 'v', locale: 'en' });
+    transport.open = true;
+    transport.events.next({ kind: 'connection', state: 'connected' });
+    bridge.startUtterance();
+    capture.chunks$.error(new Error('mic dropped'));
+    expect(bridge.utteranceActive()).toBeFalse();
+    expect(transport.sentControl.at(-1)).toEqual({ type: 'student.utterance.end' });
   });
 
   it('routes teacher audio lifecycle (begin / binary / end) into the playback service', () => {
