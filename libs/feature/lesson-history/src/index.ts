@@ -8,3 +8,4 @@ export * from './lib/events/lesson-history-events';
 export * from './lib/pipeline/search';
 export * from './lib/pipeline/recorder';
 export * from './lib/pipeline/session-store';
+export * from './lib/clients/lessons.api';
