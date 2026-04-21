@@ -65,6 +65,7 @@ export class ClassroomSessionService {
   private readonly _startedAt = signal<number>(Date.now());
   private readonly _now = signal<number>(Date.now());
   private readonly _autoRearm = signal<boolean>(true);
+  private readonly _simulatorEnabled = signal<boolean>(true);
 
   private readonly timers = new Set<ReturnType<typeof setTimeout>>();
   private readonly intervals = new Set<ReturnType<typeof setInterval>>();
@@ -169,7 +170,9 @@ export class ClassroomSessionService {
   private scheduleProcessingResponse(): void {
     this.setAvatar('thinking');
     this.addTurn({ id: this.uid('s'), role: 'student', text: '…' });
-    this.scheduleTimer(() => this.teacherSpeaksDemo(), 900);
+    if (this._simulatorEnabled()) {
+      this.scheduleTimer(() => this.teacherSpeaksDemo(), 900);
+    }
   }
 
   private teacherSpeaksDemo(): void {
@@ -287,6 +290,14 @@ export class ClassroomSessionService {
 
   setAutoRearm(on: boolean): void {
     this._autoRearm.set(on);
+  }
+
+  setSimulatorEnabled(on: boolean): void {
+    this._simulatorEnabled.set(on);
+  }
+
+  simulatorEnabled(): boolean {
+    return this._simulatorEnabled();
   }
 
   endSession(): void {
